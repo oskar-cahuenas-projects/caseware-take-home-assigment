@@ -1,0 +1,16 @@
+stateDiagram-v2
+  direction LR
+  [*] --> Unknown: existing engagement, not yet backfilled
+  [*] --> UpToDate: created at branch head
+  Unknown --> UpToDate: backfilled, no candidate
+  Unknown --> Pending: backfilled, candidate exists
+  UpToDate --> Pending: newer version published
+  Pending --> UpToDate: head applied, or head withdrawn with no fallback
+  Pending --> Declined: user declines head, or head withdrawn and fallback already declined
+  Declined --> Pending: newer version published
+  Declined --> UpToDate: declined head withdrawn, no fallback
+  note right of Pending
+    Stays Pending when a newer head is published,
+    the head is withdrawn with a fallback candidate,
+    or an older candidate is applied.
+  end note

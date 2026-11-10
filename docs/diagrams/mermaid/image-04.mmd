@@ -1,0 +1,14 @@
+flowchart LR
+  TS[("Template Store<br/>global")] -- "TemplatePublished /<br/>VersionWithdrawn (outbox)" --> EB["Global EventBridge"]
+  EB --> PL["Summary Planner"]
+  HG[("Baseline histogram<br/>counts per product + version,<br/>no firm IDs")] --> PL
+  API["Regional Read API<br/>cache miss"] -- "version IDs + locale only" --> Q["SQS summary jobs<br/>+ DLQ"]
+  PL --> Q
+  Q --> W["Summary Worker<br/>Java 21 on ECS Fargate"]
+  W --> DF["JSON Diff<br/>→ ChangeFacts"]
+  W --> BR["Amazon Bedrock<br/>pinned model"]
+  W --> G{"Quality gates"}
+  G -- pass --> S3[("S3 Object Lock<br/>evidence bundle")]
+  G -- "pass / fail" --> DDB[("DynamoDB<br/>pointer + SummaryRecord")]
+  S3 -- "S3 replication<br/>(template-derived only)" --> R[("Cell read replicas<br/>US / CA / EU")]
+  DDB -- "SummaryPublished event" --> R

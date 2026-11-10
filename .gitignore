@@ -1,0 +1,161 @@
+# ---------------------------------------------------------------
+# Java
+# ---------------------------------------------------------------
+*.class
+*.log
+hs_err_pid*
+replay_pid*
+*.hprof
+*.jfr
+
+# Packaged artifacts
+*.jar
+*.war
+*.ear
+*.nar
+*.zip
+*.tar.gz
+*.rar
+
+# Keep build-tool wrapper jars
+!**/gradle/wrapper/gradle-wrapper.jar
+!**/.mvn/wrapper/maven-wrapper.jar
+
+# ---------------------------------------------------------------
+# Build output / compiled classes
+# ---------------------------------------------------------------
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+
+# Gradle
+.gradle/
+build/
+!**/src/**/build/
+.gradletasknamecache
+
+# Plain javac / generic
+out/
+bin/
+classes/
+gen/
+generated/
+
+# ---------------------------------------------------------------
+# IDEs and editors
+# ---------------------------------------------------------------
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+.idea_modules/
+
+# Eclipse
+.project
+.classpath
+.settings/
+.metadata/
+.factorypath
+.apt_generated/
+.apt_generated_tests/
+.recommenders/
+.loadpath
+*.launch
+
+# NetBeans
+nbproject/private/
+nbbuild/
+nbdist/
+.nb-gradle/
+
+# VS Code (keep shared workspace/settings if added deliberately)
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+!caseware-take-home-assignment.code-workspace
+.history/
+*.code-workspace
+
+# Vim / Emacs / Sublime
+*.swp
+*.swo
+*~
+\#*\#
+.\#*
+*.sublime-project
+*.sublime-workspace
+
+# ---------------------------------------------------------------
+# Temp files
+# ---------------------------------------------------------------
+tmp/
+temp/
+*.tmp
+*.temp
+*.bak
+*.orig
+*.rej
+
+# ---------------------------------------------------------------
+# Environment and secrets
+# ---------------------------------------------------------------
+.env
+.env.*
+!.env.example
+
+# ---------------------------------------------------------------
+# macOS
+# ---------------------------------------------------------------
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# ---------------------------------------------------------------
+# Windows
+# ---------------------------------------------------------------
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# ---------------------------------------------------------------
+# Linux
+# ---------------------------------------------------------------
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*

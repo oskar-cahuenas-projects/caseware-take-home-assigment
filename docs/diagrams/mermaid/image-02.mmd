@@ -1,0 +1,69 @@
+sequenceDiagram
+    autonumber
+    actor CT as Content team
+    box Global us-east-1 - template data only
+    participant TS as Template Store + outbox
+    participant RL as Outbox Relay
+    participant GB as Global EventBridge
+    participant SG as Summary Generator
+    end
+    box Regional cell US / CA / EU - firm data stays here
+    participant RB as Regional EventBridge
+    participant Q as SQS projection queue
+    participant TTS as Template Tracking Service
+    participant DB as DynamoDB projection
+    participant ST as Streams consumer
+    participant API as Regional Read API
+    end
+    actor U as Firm user
+
+    CT->>TS: Publish version V (branch B, branchSeq S)
+    TS->>TS: One transaction: version row + outbox row
+    TS-->>CT: 200 OK
+    loop every ~1 s
+        RL->>TS: Read unsent outbox rows
+        RL->>GB: PutEvents TemplatePublished(templateId, versionId, branchId, S, publishSeq)
+        RL->>TS: Mark rows sent
+    end
+    Note over RL,GB: At-least-once delivery. Duplicates are expected and harmless.
+
+    par Hot path, every cell
+        GB-)RB: Cross-Region rule
+        RB-)Q: Rule target, DLQ attached
+    and Cold path, global
+        GB-)SG: Summary job via SQS
+        SG->>SG: ChangeFacts + LLM + gates per version pair
+    end
+
+    Q->>TTS: Receive TemplatePublished
+    TTS->>DB: Put VersionNode, condition publishSeq is new
+    TTS->>Q: Enqueue 32 shard tasks
+    Note over Q,DB: Shard tasks retry independently. A failing shard goes to the DLQ and does not block the others.
+    loop each shard task, 1 MB pages
+        TTS->>DB: Query GSI2 (templateId, branchId, shard), curSeq below S
+        TTS->>DB: UpdateItem STATE set head V, status PENDING, condition headSeq and curSeq below S
+        TTS->>DB: Update PublishRun shard progress
+    end
+    Note over Q,ST: The condition turns replays and out-of-order publishes into no-ops. No engagement load and no LLM on this path.
+
+    DB-)ST: Stream records, old and new image
+    ST->>DB: ADD FirmCounts deltas, once per batch
+    ST-)ST: Append to in-region S3 history
+
+    SG-)RB: SummaryPublished(templateId, from, to, summaryId, contentHash) via global bus
+    RB-)TTS: Deliver SummaryPublished
+    TTS->>DB: Put summary pointer, content arrives by S3 replication
+
+    loop poll every ~30 s
+        U->>API: GET counts + filtered list
+        API->>DB: Get FirmCounts, Query GSI1 shards
+        API-->>U: Pending flags
+    end
+    U->>API: Open pending update for engagement E
+    API->>DB: Get STATE + summary pointer (cur to head)
+    alt Summary available
+        API-->>U: Summary + summaryId + contentHash
+    else Not yet available
+        API-->>U: Flag + deterministic change list
+    end
+    Note over DB,U: The decision goes to Engagement Management with summaryId and contentHash, then returns as an event.

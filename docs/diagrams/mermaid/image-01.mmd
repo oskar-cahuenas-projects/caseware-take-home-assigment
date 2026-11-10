@@ -1,0 +1,60 @@
+flowchart LR
+  CT(["Content teams"]):::actor
+  USR(["Firm users"]):::actor
+
+  subgraph GLOBAL["GLOBAL — us-east-1 · template data only, no firm data"]
+    TS[("Template Store<br/>SQL Server + outbox table")]:::existing
+    RELAY["Outbox Relay"]:::new
+    GBUS{{"EventBridge<br/>global bus + archive"}}:::new
+    SQ[["SQS<br/>summary jobs"]]:::new
+    SG["Summary Generator<br/>ECS Fargate"]:::new
+    DIFF["Template Diff<br/>JSON diff"]:::existing
+    LLM["Amazon Bedrock<br/>Claude Haiku 5.5, pinned"]:::new
+    S3G[("S3 summaries<br/>Object Lock, hashed")]:::new
+  end
+
+  subgraph CELL["REGIONAL CELL — US · CA · EU (one per residency zone)"]
+    RBUS{{"EventBridge<br/>regional bus + archive"}}:::new
+    PQ[["SQS<br/>projection updates + DLQ"]]:::new
+    TTS["Template Tracking Service<br/>Lambda · projection owner"]:::new
+    PDB[("DynamoDB<br/>projection · decision copy · firm counts · version graph copy")]:::new
+    API["Regional Read API<br/>API Gateway + Lambda"]:::new
+    S3R[("S3 summaries<br/>read replica")]:::new
+    EMS["Engagement Management<br/>create · load ~1 min · apply/decline"]:::existing
+    EDB[("Firm DBs<br/>+ outbox + engagement_seq")]:::existing
+    FREL["Firm Outbox Relay<br/>nudge + sweep"]:::new
+    REC["Backfill and Reconciliation<br/>scheduler"]:::new
+    LQ[["SQS<br/>load jobs"]]:::new
+    FW["Fan-out Worker<br/>ECS Fargate · capped concurrency"]:::new
+  end
+
+  CT --> TS
+  TS ==>|"TemplatePublished / VersionWithdrawn"| RELAY
+  RELAY ==> GBUS
+  GBUS ==>|"cross-Region rule"| RBUS
+  RBUS ==> PQ
+  PQ ==> TTS
+  TTS ==>|"set pending"| PDB
+  USR -->|"poll"| API
+  USR -->|"apply / decline"| EMS
+  API --> PDB
+  API --> S3R
+  EMS --- EDB
+  EDB ==> FREL
+  FREL ==>|"Created · Applied · Declined · Snapshotted"| RBUS
+
+  GBUS -.-> SQ
+  API -.->|"version IDs only"| SQ
+  SQ -.-> SG
+  SG -.-> DIFF
+  SG -.-> LLM
+  SG -.-> S3G
+  S3G -.->|"S3 replication"| S3R
+  REC -.->|"find unknown / stale"| PDB
+  REC -.-> LQ
+  LQ -.-> FW
+  FW -.->|"rate-limited load"| EMS
+
+  classDef existing fill:#e8e8e8,stroke:#666,color:#111
+  classDef new fill:#dbeafe,stroke:#1d4ed8,color:#111
+  classDef actor fill:#fff,stroke:#999,stroke-dasharray:3 3,color:#111
