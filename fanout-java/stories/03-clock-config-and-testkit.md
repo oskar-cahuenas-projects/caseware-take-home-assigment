@@ -2,7 +2,7 @@
 
 - **Epic:** E2 Adapters & test kit
 - **Priority:** Must
-- **Status:** To do
+- **Status:** Done
 - **Depends on:** 02
 - **Contract refs:** §C heartbeat, §E preamble (deterministic Clock)
 - **Contract tests:** None
@@ -22,9 +22,9 @@ Covers NFR-04, NFR-08. Applies G-10, G-14, G-15, G-18. Per G-10, adapters evalua
 - AC5 — Given `Await.until(condition, timeout)`, When the condition never holds, Then it fails with a clear message without `Thread.sleep` in main code (→ NFR-08).
 
 ## Tasks
-- [ ] `Scheduler` port + `VirtualThreadScheduler` (adapter.memory) + `ManualScheduler` (test kit).
-- [ ] `ExecutorConfig` with `production()` and `forTests()`.
-- [ ] Test kit: `MutableClock`, `Await`.
+- [x] `Scheduler` port + `VirtualThreadScheduler` (adapter.memory) + `ManualScheduler` (test kit).
+- [x] `ExecutorConfig` with `production()` and `forTests()`.
+- [x] Test kit: `MutableClock`, `Await`.
 
 ## Out of scope
 - Fake loader and crash injector (story 07).
@@ -34,4 +34,10 @@ Covers NFR-04, NFR-08. Applies G-10, G-14, G-15, G-18. Per G-10, adapters evalua
   card, index and traceability matrix updated; commit created.
 
 ## Notes / decisions
-<Filled during implementation.>
+- AC → test: AC1 `MutableClockTest`; AC2 `ManualSchedulerTest`; AC3 `ExecutorConfigTest#productionDefaults`, `#gapDefaults`; AC4 `ExecutorConfigTest#rejects*`; AC5 `AwaitTest#failsWithClearMessage`. Concurrency classes (`VirtualThreadSchedulerTest`, `MutableClockTest`, `ManualSchedulerTest`, `AwaitTest`) passed 5/5 runs.
+- `ExecutorConfig` (package `executor`) is one record with 19 components and a copy-and-override `Builder` (used for G-18's E7 profile and per-test C/N). Derived: `permitsPerTask() = ⌊C/N⌋`, `firmCap() = max(1, ⌊0.2·⌊C/N⌋⌋)`. Production C = 50, N = 2 (3.3 low scenario, A3/A4).
+- Values not in the contract: `receiveWait` 20 s (SQS long-poll max) [A 90%]; `maxReceiveBatch` 10 (SQS max, G-24). Everything else cites §C or a gap in the source.
+- `forTests()` = production with every duration divided by 1000 (1 s → 1 ms); counts and weights unchanged. W becomes 86.4 s, which is longer than any test run, so coalescing tests stay valid.
+- `Scheduler.Cancellable` is nested in the port. `VirtualThreadScheduler` uses one timer thread and runs each firing on a new virtual thread, so a throwing heartbeat does not cancel the fixed-rate schedule. It uses real time and must be paired with the system clock.
+- `ManualScheduler.runDue()` runs on the calling thread; a fixed-rate task fires once per elapsed period (catch-up), which is what a heartbeat test advancing several minutes expects.
+- Added beyond the card: `MainCodeTimeSourcesTest` scans `src/main` for `Instant.now(`, `System.currentTimeMillis(`, `System.nanoTime(`, `Thread.sleep(` (NFR-08). Verified it fails on a planted `Instant.now()`. Story 16's grep check is now this test.
