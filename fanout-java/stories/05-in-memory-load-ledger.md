@@ -2,7 +2,7 @@
 
 - **Epic:** E2 Adapters & test kit
 - **Priority:** Must
-- **Status:** To do
+- **Status:** Done
 - **Depends on:** 03
 - **Contract refs:** §B LoadLedger/Claim, §D rows 4–6, §F (ledger as outbox)
 - **Contract tests:** groundwork E2, E3
@@ -25,8 +25,8 @@ Covers FR-21, FR-03, FR-04, FR-16. Applies G-04, G-06, G-14, G-19, G-21.
 - AC8 — Given 50 threads claiming one engagement concurrently, Then exactly one `Claimed` (→ FR-21).
 
 ## Tasks
-- [ ] `InMemoryLoadLedger` with `ConcurrentHashMap.compute`.
-- [ ] Unit + concurrency tests.
+- [x] `InMemoryLoadLedger` with `ConcurrentHashMap.compute`.
+- [x] Unit + concurrency tests.
 
 ## Out of scope
 - Ledger sweeper for abandoned `PENDING_PUBLISH` (reconciliation, A9).
@@ -36,4 +36,10 @@ Covers FR-21, FR-03, FR-04, FR-16. Applies G-04, G-06, G-14, G-19, G-21.
   card, index and traceability matrix updated; commit created.
 
 ## Notes / decisions
-<Filled during implementation.>
+- AC → test (`InMemoryLoadLedgerTest`): AC1 `claimNewEntry`; AC2 `inFlightElsewhereThenClaimedAfterExpiry`; AC3 `alreadyFresh`, `staleByTime`, `staleBySequence`; AC4 `pendingPublishWinsOverLease`; AC5 `markPublished`; AC6 `freshnessWithoutSequence`; AC7 `release`, `releaseKeepsOutbox`; AC8 `concurrentClaimsExactlyOneWinner` (50 virtual threads behind a start latch). 5/5 runs green; AC8 verified to fail 3/3 with a non-atomic read-then-write `claim`.
+- Each operation is one `ConcurrentHashMap.compute` over an immutable `Entry` record, modelling a DynamoDB conditional write.
+- Freshness (G-19 row 2) uses the loader's `state.observedAt()`, not the ledger clock at record time, and `observedAt + W > now` (strict). With no sequence (A1 false) only the time check applies.
+- Job IDs: a `PendingPublish` claim attaches the caller's `jobId` (G-19 row 1). A `Claimed` over a `LEASED` entry (expired, or the same worker) keeps the attached IDs and adds the new one; over an absent or `DONE` entry it starts a new list. `recordObservation` keeps the list, so the published event names every attached job.
+- `recordObservation` has no owner check (the §B/G-06 signature has no `workerId`); it always writes `PENDING_PUBLISH`. G-14's lease ≥ hard timeout + margin keeps a late writer from racing a new owner in practice. It rejects a state whose `engagementId` differs from the key.
+- `release` only drops a `LEASED` entry owned by the caller; a recorded observation is never dropped (`releaseKeepsOutbox`).
+- Added `status(engagementId)` (public) for tests and observability; not a port method.

@@ -170,8 +170,8 @@ Test column is filled in by each story.
 |---|---|---|
 | FR-01 | 13 | |
 | FR-02 | 08 | |
-| FR-03 | 05, 08 | |
-| FR-04 | 05, 08 | |
+| FR-03 | 05, 08 | `InMemoryLoadLedgerTest#alreadyFresh` (05) |
+| FR-04 | 05, 08 | `InMemoryLoadLedgerTest#inFlightElsewhereThenClaimedAfterExpiry` (05) |
 | FR-05 | 09 | |
 | FR-06 | 06, 08, 13 | |
 | FR-07 | 12 | |
@@ -183,12 +183,12 @@ Test column is filled in by each story.
 | FR-13 | 06, 08 | |
 | FR-14 | 06, 08 | |
 | FR-15 | 09 | |
-| FR-16 | 02, 05, 08 | `DomainBehaviourTest` (02) |
+| FR-16 | 02, 05, 08 | `DomainBehaviourTest` (02), `InMemoryLoadLedgerTest#freshnessWithoutSequence` (05) |
 | FR-17 | 02, 07 | `EventPayloadPolicyTest`, `RecordValidationTest` (02) |
 | FR-18 | 04, 11 | `InMemoryWorkQueueTest#maxReceiveCountDeadLetters` (04) |
 | FR-19 | 07, 11 | |
 | FR-20 | 04 | `InMemoryWorkQueueTest` |
-| FR-21 | 05 | |
+| FR-21 | 05 | `InMemoryLoadLedgerTest` |
 | FR-22 | 14 | |
 | FR-23 | 14 | |
 | FR-24 | 14 | |

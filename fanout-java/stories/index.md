@@ -24,7 +24,7 @@ Requirements: [`../docs/requirements.md`](../docs/requirements.md) · Gaps: [`..
 | 02 | [Domain model and ports](02-domain-model-and-ports.md) | E1 | Must | Done | — | None |
 | 03 | [Clock, config and test kit](03-clock-config-and-testkit.md) | E2 | Must | Done | — | None |
 | 04 | [In-memory work queue](04-in-memory-work-queue.md) | E2 | Must | Done | — | None |
-| 05 | [In-memory load ledger](05-in-memory-load-ledger.md) | E2 | Must | To do | groundwork E2, E3 | None |
+| 05 | [In-memory load ledger](05-in-memory-load-ledger.md) | E2 | Must | Done | groundwork E2, E3 | None |
 | 06 | [Concurrency limiter](06-concurrency-limiter.md) | E2 | Must | To do | groundwork E1 | None |
 | 07 | [Job store, publisher and fake loader](07-job-store-publisher-and-fake-loader.md) | E2 | Must | To do | E8 (outcomes) | None |
 | 08 | [Executor core and step order](08-executor-core-step-order.md) | E3 | Must | To do | E1, E2 | None |
