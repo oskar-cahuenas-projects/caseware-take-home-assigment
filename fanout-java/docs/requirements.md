@@ -168,12 +168,12 @@ Test column is filled in by each story.
 
 | FR / NFR | Story | Test |
 |---|---|---|
-| FR-01 | 13 | |
+| FR-01 | 13 | `LanePollerTest`, `LaneQueuesTest#weightedWhenAllLanesBusy`, `LaneQueuesTest#workConserving` |
 | FR-02 | 08 | `LoadExecutorTest#stepOrder` |
 | FR-03 | 05, 08 | `InMemoryLoadLedgerTest#alreadyFresh` (05), `ContractE02CoalescingTest` (08) |
 | FR-04 | 05, 08 | `InMemoryLoadLedgerTest#inFlightElsewhereThenClaimedAfterExpiry` (05), `ContractE02CoalescingTest#duplicateMidLoad` (08) |
 | FR-05 | 09 | `ContractE03CrashInjectionTest`, `PublishFailureTest` |
-| FR-06 | 06, 08, 13 | `SemaphoreConcurrencyLimiterTest#budgetExhausted` (06), `LoadExecutorTest#noPermitDefers` (08) |
+| FR-06 | 06, 08, 13 | `SemaphoreConcurrencyLimiterTest#budgetExhausted` (06), `LoadExecutorTest#noPermitDefers` (08), `FirmCapDeferralTest`, `ContractE05FairnessTest` (13) |
 | FR-07 | 12 | `HeartbeatTimeoutTest#hardTimeoutIsTransient`, `HeartbeatTimeoutTest#lateResultDiscardedPermitHeldUntilReturn` |
 | FR-08 | 12 | `ContractE07HeartbeatTest`, `HeartbeatTimeoutTest#heartbeatExtendsEveryInterval`, `HeartbeatTimeoutTest#cancelledOnEveryExitPath` |
 | FR-09 | 08 | `LoadExecutorTest#stepOrder` |
@@ -203,7 +203,7 @@ Test column is filled in by each story.
 | NFR-07 | 01 | `PomDependencyPolicyTest`, `BuildSmokeTest` |
 | NFR-08 | 03, 16 | `MainCodeTimeSourcesTest`, `ManualSchedulerTest`, `MutableClockTest` (03) |
 | NFR-09 | 16 | |
-| NFR-10 | 10, 13 | `ThrottlingTest` via `breakerState()` (10) |
+| NFR-10 | 10, 13 | `ThrottlingTest` via `breakerState()` (10); permits in use via `SemaphoreConcurrencyLimiter#inUse`, DLQ via `InMemoryWorkQueue#deadLetters` (13). No coalesced counter (Could; not built). |
 
 ### 6.3 Contract coverage
 

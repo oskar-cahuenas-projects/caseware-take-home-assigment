@@ -49,7 +49,7 @@ com.caseware.fanout
   domain          records, enums, sealed types (§B + G-04, G-06, G-07, G-08, G-16, G-26)
   port            WorkQueue, Delivery, LoadLedger, Claim, ConcurrencyLimiter, Permit, FanoutJobStore,
                   EngagementLoader, ObservationPublisher, CandidateSource, Scheduler
-  executor        LoadExecutor, LanePoller, CircuitBreaker, Backoff, Heartbeat, ExecutorConfig, ExecutorFactory
+  executor        LoadExecutor, LanePoller, LaneQueues, CircuitBreaker, Backoff, Heartbeat, ExecutorConfig, ExecutorFactory
   planner         Planner (story 14)
   adapter.memory  InMemoryWorkQueue, InMemoryLoadLedger, SemaphoreConcurrencyLimiter,
                   InMemoryFanoutJobStore, InMemoryObservationPublisher, VirtualThreadScheduler
@@ -63,6 +63,7 @@ test: testkit (MutableClock, ManualScheduler, FakeEngagementLoader, CrashInjecto
 |---|---|
 | `LoadExecutor` | The 8-step order and the branch per `Claim` and per `LoaderException`. Owns `workerId`. `pollOnce()` for deterministic tests; `start()/stop()` loop on a virtual thread. |
 | `LanePoller` | Which lane(s) to receive from next (G-13). Strategy. |
+| `LaneQueues` | Composite `WorkQueue` over the three lanes: receive via `LanePoller`, other operations to the request's own lane. |
 | `CircuitBreaker` | CLOSED/OPEN/HALF_OPEN transitions on the clock (G-03). State pattern via a sealed state type. |
 | `Backoff` | Delay for a retry or deferral: full jitter, `retryAfter` floor, 15-min cap (G-12, G-16, G-24). Strategy. |
 | `Heartbeat` | Schedules `extendVisibility` every interval; cancelled in `finally` (§C). |
@@ -127,7 +128,7 @@ Permit is closed right after step 3 returns; heartbeat and timeout are cancelled
 - **Threads.** Each executor runs one receive loop on a virtual thread; each received message is handled on its own virtual thread. Concurrency is bounded by permits, not by threads.
 - **Permits.** Per task: `⌊C/N⌋` via a `Semaphore` (`tryAcquire`, never blocking) plus a per-firm `ConcurrentHashMap<firmId, AtomicInteger>` capped at `k = max(1, ⌊0.2·⌊C/N⌋⌋)`. Acquire order: firm slot, then semaphore; roll back the firm slot on semaphore failure. Global invariant: Σ tasks ≤ N·⌊C/N⌋ ≤ C.
 - **Receive sizing.** At most `freePermits` messages per receive (G-24), so deferrals happen mostly for the firm cap.
-- **Lanes.** SWRR sequence of 10 slots (P B P R P B P B P P pattern from weights 6:3:1); empty lane → next lane (G-13).
+- **Lanes.** SWRR cycle of 10 slots (6:3:1 → P B P P B P R P B P), one slot per receive; empty lane → the next lanes in cycle order (G-13). `LaneQueues` presents the three lanes to the executor as one `WorkQueue` and routes ack/extend/requeue/dead-letter by `LoadRequest.lane`.
 - **Breaker.** Per task (G-27). OPEN → loop skips receive and idles via the scheduler; in-flight loads finish (A7). HALF_OPEN → receive exactly one message as the probe.
 - **Coalescing.** Atomic ledger claim (G-19) guarantees one `Claimed` per engagement per lease; duplicates requeue until the lease ends (G-05) and then coalesce.
 
