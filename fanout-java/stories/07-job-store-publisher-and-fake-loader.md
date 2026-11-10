@@ -2,7 +2,7 @@
 
 - **Epic:** E2 Adapters & test kit
 - **Priority:** Must
-- **Status:** To do
+- **Status:** Done
 - **Depends on:** 03
 - **Contract refs:** §A I5, I6, I7; §B FanoutJobStore, EngagementLoader, events; §D row 16
 - **Contract tests:** E8 (duplicate outcomes)
@@ -24,9 +24,9 @@ Covers FR-19, FR-17. Applies G-01, G-07, G-11, G-25 (read method only).
 - AC7 — Given 100 threads recording outcomes for the same items concurrently, Then counters are exact (→ FR-19).
 
 ## Tasks
-- [ ] `InMemoryFanoutJobStore`, `InMemoryObservationPublisher`.
-- [ ] Test kit: `FakeEngagementLoader`, `CrashInjector`.
-- [ ] `ContractE08JobIdempotencyTest` (outcome half; event half in story 14).
+- [x] `InMemoryFanoutJobStore`, `InMemoryObservationPublisher`.
+- [x] Test kit: `FakeEngagementLoader`, `CrashInjector`.
+- [x] `ContractE08JobIdempotencyTest` (outcome half; event half in story 14).
 
 ## Out of scope
 - Planner-side job operations (story 14).
@@ -36,4 +36,8 @@ Covers FR-19, FR-17. Applies G-01, G-07, G-11, G-25 (read method only).
   card, index and traceability matrix updated; commit created.
 
 ## Notes / decisions
-<Filled during implementation.>
+- AC → test: AC1 `InMemoryFanoutJobStoreTest#createIfAbsentIsIdempotent`; AC2 `#firstOutcomeWins`, `ContractE08JobIdempotencyTest#duplicateOutcomes`; AC3 `#completesOnCloseRule`, `#planningJobDoesNotComplete`; AC4 `InMemoryObservationPublisherTest#failNext`; AC5 `FakeEngagementLoaderTest` (7 tests); AC6 `CrashInjectorTest`; AC7 `ContractE08JobIdempotencyTest#concurrentDuplicateOutcomes` (100 threads × 500 items). Concurrency classes 5/5 green; E8 concurrent test verified to fail 3/3 with a non-atomic read-then-write store.
+- Job store: one `computeIfPresent` per outcome over an immutable `{job, outcomes}` item (transaction model). First outcome wins; `PLANNED` → `COMPLETE` when closed; a `PLANNING` job never completes here (the Planner's `markPlanned`, story 14, must re-check the rule). Unknown job → WARNING log with IDs, ignored (EC-25). Added `outcome(jobId, engagementId)` for tests.
+- Publisher: `failNext(n)` throws `PublishFailedException` without recording; `events()`, `observedEvents()`, `failedEvents()`, `failedAttempts()`.
+- Added beyond the card: `executor.CrashHook` (main code) with `Point {AFTER_CLAIM, AFTER_LOAD, AFTER_RECORD, AFTER_PUBLISH}` and a no-op `NONE`; the executor (story 08) calls it. `CrashInjector` implements it; `SimulatedCrash extends Error` lives in the test kit.
+- `FakeEngagementLoader`: steps `ok`, `ok(seq)`, `throttled`, `transientFailure`, `notFound`, `permanent`, `runtime` (G-23 poison), `hang`; switchable default; gate (`holdCalls`/`releaseCalls`) for deterministic tests and real-time `setLatency` for concurrency tests. Ignores `timeout`; interruption → `Transient` with the interrupt flag kept (G-28). Counters: calls per engagement, total, in-flight, peak total and per firm, `maxFirmPeak()`, `startOrder()` (for E5 ranks).

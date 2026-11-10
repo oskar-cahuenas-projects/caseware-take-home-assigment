@@ -184,9 +184,9 @@ Test column is filled in by each story.
 | FR-14 | 06, 08 | `SemaphoreConcurrencyLimiterTest#doubleCloseReleasesOnce`, `#releasedOnException` (06) |
 | FR-15 | 09 | |
 | FR-16 | 02, 05, 08 | `DomainBehaviourTest` (02), `InMemoryLoadLedgerTest#freshnessWithoutSequence` (05) |
-| FR-17 | 02, 07 | `EventPayloadPolicyTest`, `RecordValidationTest` (02) |
+| FR-17 | 02, 07 | `EventPayloadPolicyTest`, `RecordValidationTest` (02), `InMemoryObservationPublisherTest` (07) |
 | FR-18 | 04, 11 | `InMemoryWorkQueueTest#maxReceiveCountDeadLetters` (04) |
-| FR-19 | 07, 11 | |
+| FR-19 | 07, 11 | `InMemoryFanoutJobStoreTest`, `ContractE08JobIdempotencyTest` (07) |
 | FR-20 | 04 | `InMemoryWorkQueueTest` |
 | FR-21 | 05 | `InMemoryLoadLedgerTest` |
 | FR-22 | 14 | |
