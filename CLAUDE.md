@@ -27,10 +27,9 @@ Run from `fanout-java/`. Maven wrapper pins Maven 3.9.10; JDK 21 required.
 - `docs/solution-design.md`: the final, consolidated design document (5 sections). **This is the deliverable.** When it disagrees with an analysis file, the design document wins.
 - `fanout-java/README.md`: the Part 2 README (scope, contract mapping, tradeoffs, limitations).
 - `fanout-java/fanout-worker-contract.md`: the **Part 2 specification**. It defines the interfaces I1–I7, the Java record and interface signatures, the executor step order, the failure matrix, and the 10 prioritized tests. Read it before writing any Part 2 code.
-- `fanout-java/analysis-documents/`: one closed file per WBS work package (1.1 to 6). They were inputs to the design document. Where two of them disagree, the later section was applied during the WBS 8 review. Two that still matter for Part 2: `WBS-3.2-unreliable-delivery.md` (idempotency and outbox) and `wbs-3.3-failure-recovery-data-residency.md`.
-- `docs/chat-session-log/log-chat-design-document.md`: the AI session log. Its "Open items" section lists unresolved questions.
-- `ai-usage-notes.md` (repository root) and `docs/ai-usage-notes.md` are identical copies. Edit both, or ask which one to keep.
-- `caseware-design-*.pdf`: exported renderings of the design. They are not regenerated automatically.
+- `fanout-java/analysis-documents/`: one closed file per WBS work package (1.1 to 6). They were inputs to the design document. Where two of them disagree, the later section was applied during the WBS 8 review. Two that still matter for Part 2: `wbs-3.2-unreliable-delivery.md` (idempotency and outbox) and `wbs-3.3-failure-recovery-data-residency.md`.
+- `docs/chat-session-log/`: the AI session logs, `log-chat-design-document.md` (Part 1) and `log-chat-coding-fanout.md` (Part 2). Each ends with an "Open items" section.
+- `docs/ai-usage-notes.md`: AI usage notes for Parts 1 and 2 (the only copy).
 
 ## Diagrams
 

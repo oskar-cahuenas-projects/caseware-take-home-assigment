@@ -1,6 +1,6 @@
 # AI usage in Part 2: draft
 
-> Written by the AI in story 17 for the owner to edit. It records **what happened**. The judgments (what was useful, what to distrust, how to guide others) are the owner's to write in `ai-usage-notes.md`. Lines marked **[owner]** need the owner's input.
+> Merged into [`docs/ai-usage-notes.md`](../../docs/ai-usage-notes.md); kept as the raw record. Written by the AI in story 17 for the owner to edit. It records **what happened**. The judgments (what was useful, what to distrust, how to guide others) are the owner's to write in `ai-usage-notes.md`. Lines marked **[owner]** need the owner's input.
 
 ## Setup
 
