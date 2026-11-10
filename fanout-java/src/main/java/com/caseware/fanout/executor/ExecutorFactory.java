@@ -10,11 +10,16 @@ public final class ExecutorFactory {
 
     private ExecutorFactory() { }
 
-    /** Task {@code i} gets {@code workerId = "worker-i"} and {@code new Random(seed + i)}. */
+    /** Production wiring: no crash injection. */
     public static List<LoadExecutor> create(ExecutorConfig config, ExecutorPorts ports, long seed) {
+        return create(config, ports, seed, CrashHook.NONE);
+    }
+
+    /** Task {@code i} gets {@code workerId = "worker-i"} and {@code new Random(seed + i)}; all share {@code crashHook}. */
+    public static List<LoadExecutor> create(ExecutorConfig config, ExecutorPorts ports, long seed, CrashHook crashHook) {
         return IntStream.range(0, config.tasks())
                 .mapToObj(i -> new LoadExecutor("worker-" + i, ports,
-                        SemaphoreConcurrencyLimiter.forTask(config), config, new Random(seed + i)))
+                        SemaphoreConcurrencyLimiter.forTask(config), config, new Random(seed + i), crashHook))
                 .toList();
     }
 }

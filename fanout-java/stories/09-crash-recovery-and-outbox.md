@@ -2,7 +2,7 @@
 
 - **Epic:** E3 Executor core
 - **Priority:** Must
-- **Status:** To do
+- **Status:** Done
 - **Depends on:** 08
 - **Contract refs:** §C step order, §D rows 5–7, §F ledger as outbox
 - **Contract tests:** E3
@@ -22,8 +22,8 @@ Covers FR-05, FR-15, NFR-02, NFR-03. Applies G-11, G-22.
 - AC5 — Given a publish failure, Then no ack; the redelivery republishes without reloading (→ G-22).
 
 ## Tasks
-- [ ] Crash hooks at the four points.
-- [ ] `ContractE03CrashInjectionTest` (parameterised over the four points).
+- [x] Crash hooks at the four points.
+- [x] `ContractE03CrashInjectionTest` (parameterised over the four points).
 
 ## Out of scope
 - Ledger sweeper (A9).
@@ -33,4 +33,9 @@ Covers FR-05, FR-15, NFR-02, NFR-03. Applies G-11, G-22.
   card, index and traceability matrix updated; commit created.
 
 ## Notes / decisions
-<Filled during implementation.>
+- AC → test: AC1–AC4 `ContractE03CrashInjectionTest#convergesAfterCrash` (one case per point; exact loads 1/2/1/1 and publishes 1/1/1/2, same `eventId`), `#crashMidBatch` (×4 points, 10 items, loads ≤ 11), `#redeliveryBeforeLeaseExpiryDoesNotLoad`; AC5 `PublishFailureTest#republishWithoutReload`, plus `#persistentPublishFailureDeadLetters` (G-22: DLQ after 5 receives, ledger stays `PENDING_PUBLISH` for reconciliation, A9). 5/5 runs green (deterministic tests).
+- Mutants detected: `PendingPublish` treated as `Claimed` (4 E3 failures); ack on handler exception (both `PublishFailureTest` cases fail).
+- `PublishFailureTest` passed on first compile: the G-22 behaviour (no ack on publish failure, `PendingPublish` on redelivery) already followed from story 08's handler. This story adds the tests that pin it.
+- Hook points (design §7): `AFTER_CLAIM` right after `claim` returns (any variant); `AFTER_LOAD` after the loader returns and the permit is closed; `AFTER_RECORD` after `recordObservation`; `AFTER_PUBLISH` after publish and before `markPublished`, on both the load and `PendingPublish` paths.
+- `LoadExecutor` constructor gains `CrashHook` (last parameter). `ExecutorFactory.create(config, ports, seed)` passes `CrashHook.NONE`; an overload takes the hook. `ExecutorHarness.deterministic(config, crashHook)` shares one hook across executors; an armed `CrashInjector` fires once.
+- Crash model per G-11: the crashed instance is not reused; the test advances `MutableClock` by `lease` (≥ visibility) and a second executor (new `workerId`) takes over.

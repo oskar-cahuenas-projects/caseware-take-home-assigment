@@ -9,6 +9,7 @@ import com.caseware.fanout.domain.FanoutJob;
 import com.caseware.fanout.domain.JobStatus;
 import com.caseware.fanout.domain.Lane;
 import com.caseware.fanout.domain.LoadRequest;
+import com.caseware.fanout.executor.CrashHook;
 import com.caseware.fanout.executor.ExecutorConfig;
 import com.caseware.fanout.executor.ExecutorFactory;
 import com.caseware.fanout.executor.ExecutorPorts;
@@ -42,7 +43,7 @@ public final class ExecutorHarness implements AutoCloseable {
     public final List<LoadExecutor> executors;
     private final AtomicLong nextRequest = new AtomicLong();
 
-    private ExecutorHarness(ExecutorConfig config, Clock clock, Scheduler scheduler) {
+    private ExecutorHarness(ExecutorConfig config, Clock clock, Scheduler scheduler, CrashHook crashHook) {
         this.config = config;
         this.clock = clock;
         this.scheduler = scheduler;
@@ -51,16 +52,21 @@ public final class ExecutorHarness implements AutoCloseable {
         this.ledger = new InMemoryLoadLedger(clock);
         this.loader = new FakeEngagementLoader(clock);
         this.ports = new ExecutorPorts(queue, ledger, jobs, publisher, loader, scheduler, clock);
-        this.executors = ExecutorFactory.create(config, ports, SEED);
+        this.executors = ExecutorFactory.create(config, ports, SEED, crashHook);
     }
 
     public static ExecutorHarness deterministic(ExecutorConfig config) {
+        return deterministic(config, CrashHook.NONE);
+    }
+
+    /** All executors share {@code crashHook}; a {@link CrashInjector} fires once, in whichever executor hits it first. */
+    public static ExecutorHarness deterministic(ExecutorConfig config, CrashHook crashHook) {
         MutableClock clock = new MutableClock(Instant.parse("2026-11-09T10:00:00Z"));
-        return new ExecutorHarness(config, clock, new ManualScheduler(clock));
+        return new ExecutorHarness(config, clock, new ManualScheduler(clock), crashHook);
     }
 
     public static ExecutorHarness realTime(ExecutorConfig config) {
-        return new ExecutorHarness(config, Clock.systemUTC(), new VirtualThreadScheduler());
+        return new ExecutorHarness(config, Clock.systemUTC(), new VirtualThreadScheduler(), CrashHook.NONE);
     }
 
     public MutableClock mutableClock() {

@@ -57,7 +57,7 @@ class LoadExecutorTest {
                 new RecordingJobs(jobs, calls), new RecordingPublisher(new InMemoryObservationPublisher(), calls),
                 new RecordingLoader(new FakeEngagementLoader(clock), calls), new ManualScheduler(clock), clock);
         var limiter = new RecordingLimiter(new SemaphoreConcurrencyLimiter(25, 5), calls);
-        var executor = new LoadExecutor("w-1", ports, limiter, CONFIG, new Random(1));
+        var executor = new LoadExecutor("w-1", ports, limiter, CONFIG, new Random(1), CrashHook.NONE);
         queue.send(new LoadRequest("req-1", "job-1", "firm-1", "eng-1", "tpl-1",
                 com.caseware.fanout.domain.Lane.PUBLISH, 0, clock.instant(), "corr-1", 0, 1, "ca-central-1"));
 
@@ -100,7 +100,7 @@ class LoadExecutorTest {
                     return 1;
                 }
             };
-            new LoadExecutor("w-x", h.ports, refusing, h.config, new Random(1)).pollOnce();
+            new LoadExecutor("w-x", h.ports, refusing, h.config, new Random(1), CrashHook.NONE).pollOnce();
 
             assertThat(h.loader.totalCalls()).isZero();
             assertThat(h.ledger.status("eng-1")).isEmpty();                       // claim released (G-21)

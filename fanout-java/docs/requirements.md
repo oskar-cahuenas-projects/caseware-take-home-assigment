@@ -172,7 +172,7 @@ Test column is filled in by each story.
 | FR-02 | 08 | `LoadExecutorTest#stepOrder` |
 | FR-03 | 05, 08 | `InMemoryLoadLedgerTest#alreadyFresh` (05), `ContractE02CoalescingTest` (08) |
 | FR-04 | 05, 08 | `InMemoryLoadLedgerTest#inFlightElsewhereThenClaimedAfterExpiry` (05), `ContractE02CoalescingTest#duplicateMidLoad` (08) |
-| FR-05 | 09 | |
+| FR-05 | 09 | `ContractE03CrashInjectionTest`, `PublishFailureTest` |
 | FR-06 | 06, 08, 13 | `SemaphoreConcurrencyLimiterTest#budgetExhausted` (06), `LoadExecutorTest#noPermitDefers` (08) |
 | FR-07 | 12 | |
 | FR-08 | 12 | |
@@ -182,7 +182,7 @@ Test column is filled in by each story.
 | FR-12 | 10 | |
 | FR-13 | 06, 08 | `SemaphoreConcurrencyLimiterTest#hammer`, `#firmCap` (06), `ContractE01CapacityInvariantTest` (08) |
 | FR-14 | 06, 08 | `SemaphoreConcurrencyLimiterTest#doubleCloseReleasesOnce`, `#releasedOnException` (06), `ContractE01CapacityInvariantTest` (08) |
-| FR-15 | 09 | |
+| FR-15 | 09 | `ContractE03CrashInjectionTest` |
 | FR-16 | 02, 05, 08 | `DomainBehaviourTest` (02), `InMemoryLoadLedgerTest#freshnessWithoutSequence` (05), `LoadExecutorTest#a1False` (08) |
 | FR-17 | 02, 07 | `EventPayloadPolicyTest`, `RecordValidationTest` (02), `InMemoryObservationPublisherTest` (07) |
 | FR-18 | 04, 11 | `InMemoryWorkQueueTest#maxReceiveCountDeadLetters` (04) |
@@ -195,8 +195,8 @@ Test column is filled in by each story.
 | FR-25 | 14 | |
 | FR-26 | 15 | |
 | NFR-01 | 08 | `ContractE01CapacityInvariantTest` |
-| NFR-02 | 09, 10, 11 | |
-| NFR-03 | 09 | |
+| NFR-02 | 09, 10, 11 | `ContractE03CrashInjectionTest#crashMidBatch` (09) |
+| NFR-03 | 09 | `ContractE03CrashInjectionTest` |
 | NFR-04 | 16 | |
 | NFR-05 | 16 | |
 | NFR-06 | 02, 16 | `EventPayloadPolicyTest` (02) |

@@ -29,7 +29,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * claim ledger → acquire permit → call loader → recordObservation → publish → markPublished →
  * record job outcome → ack. {@link #pollOnce()} runs one receive synchronously (deterministic tests);
  * {@link #start()} runs a receive loop on a virtual thread with one virtual thread per message.
- * Thread-safe.
+ * A {@link CrashHook} is called after each durable step (G-11); handlers catch {@code RuntimeException}
+ * only, so a simulated crash ({@code Error}) skips ack, requeue and release. Thread-safe.
  */
 public final class LoadExecutor implements AutoCloseable {
 
@@ -41,6 +42,7 @@ public final class LoadExecutor implements AutoCloseable {
     private final ConcurrencyLimiter limiter;
     private final ExecutorConfig config;
     private final Random random;
+    private final CrashHook crashHook;
 
     private final AtomicInteger activeHandlers = new AtomicInteger();
     private final Semaphore wakeup = new Semaphore(0);
@@ -49,12 +51,13 @@ public final class LoadExecutor implements AutoCloseable {
     private ExecutorService handlers;
 
     public LoadExecutor(String workerId, ExecutorPorts ports, ConcurrencyLimiter limiter,
-                        ExecutorConfig config, Random random) {
+                        ExecutorConfig config, Random random, CrashHook crashHook) {
         this.workerId = Objects.requireNonNull(workerId, "workerId");
         this.ports = Objects.requireNonNull(ports, "ports");
         this.limiter = Objects.requireNonNull(limiter, "limiter");
         this.config = Objects.requireNonNull(config, "config");
         this.random = Objects.requireNonNull(random, "random");
+        this.crashHook = Objects.requireNonNull(crashHook, "crashHook");
     }
 
     public String workerId() {
@@ -154,6 +157,7 @@ public final class LoadExecutor implements AutoCloseable {
         try {
             Claim claim = ports.ledger().claim(r.engagementId(), r.jobId(), workerId,
                     config.lease(), config.freshnessWindow(), r.knownSeq());                     // 1
+            crashHook.at(CrashHook.Point.AFTER_CLAIM);
             switch (claim) {
                 case Claim.AlreadyFresh fresh -> {
                     ports.jobs().recordOutcome(r.jobId(), r.engagementId(), Outcome.COALESCED);
@@ -196,8 +200,10 @@ public final class LoadExecutor implements AutoCloseable {
                     r.correlationId(), r.jobId(), r.engagementId(), e.getClass().getSimpleName());
             return;
         }
+        crashHook.at(CrashHook.Point.AFTER_LOAD);
         String eventId = ObservationIds.of(state, r.requestId());
         ports.ledger().recordObservation(r.engagementId(), state, eventId);                         // 4
+        crashHook.at(CrashHook.Point.AFTER_RECORD);
         publishAndFinish(d, r, state, eventId, List.of(r.jobId()));
     }
 
@@ -205,6 +211,7 @@ public final class LoadExecutor implements AutoCloseable {
                                   String eventId, List<String> jobIds) {
         ports.publisher().publish(new EngagementStateObserved(eventId, SCHEMA_VERSION, r.region(), r.firmId(),
                 state, jobIds, r.correlationId(), state.engagementSeq().isPresent()));               // 5
+        crashHook.at(CrashHook.Point.AFTER_PUBLISH);
         ports.ledger().markPublished(r.engagementId(), eventId);                                    // 6
         ports.jobs().recordOutcome(r.jobId(), r.engagementId(), Outcome.DONE);                      // 7
         ports.queue().ack(d);                                                                        // 8
