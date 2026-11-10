@@ -1,4 +1,4 @@
-# Fan-out Worker (Part 2)
+# Fan-out Worker
 
 Java 21 implementation of the **template-publish fan-out worker** from the [design](../docs/solution-design.md), specified in [`fanout-worker-contract.md`](fanout-worker-contract.md).
 
