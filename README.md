@@ -7,7 +7,7 @@ This repository contains my solution to the Caseware take-home architecture exer
 | # | Deliverable (from the brief) | Location |
 |---|---|---|
 | 1 | Design document | [docs/solution-design.md](docs/solution-design.md) (PDF exports: [full](caseware-design-full.pdf), [text only](caseware-design-text-only.pdf)) |
-| 2 | Code for Part 2, with a short README | [fanout-java/](fanout-java/) (Java 21, Maven): Load Executor plus thin Planner, 217 tests including contract tests E1–E10. [README and tradeoffs](fanout-java/README.md); specified in [fanout-java/fanout-worker-contract.md](fanout-java/fanout-worker-contract.md) |
+| 2 | Code for Part 2, with a short README | [fanout-java/](fanout-java/) (Java 21, Maven): Load Executor plus thin Planner, 218 tests including contract tests E1–E10, and a runnable demo on fake data. [README and tradeoffs](fanout-java/README.md); specified in [fanout-java/fanout-worker-contract.md](fanout-java/fanout-worker-contract.md) |
 | 3 | Session history of the AI tools I used | [docs/chat-session-log/log-chat-design-document.md](docs/chat-session-log/log-chat-design-document.md) |
 | 4 | Diagrams | Mermaid sources: [image-01](docs/diagrams/mermaid/image-01.mmd), [image-02](docs/diagrams/mermaid/image-02.mmd), [image-03](docs/diagrams/mermaid/image-03.mmd), [image-04](docs/diagrams/mermaid/image-04.mmd). PNG files: [image-01](docs/img/image-01.png), [image-02](docs/img/image-02.png), [image-03](docs/img/image-03.png), [image-04](docs/img/image-04.png) |
 

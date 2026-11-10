@@ -12,10 +12,43 @@ Everything runs in memory behind ports: there is no framework, no AWS SDK and no
 JDK 21 is required. The Maven wrapper pins Maven 3.9.10.
 
 ```bash
-./mvnw -q verify                        # build gate: compile and all 217 tests (~10 s)
+./mvnw -q verify                        # build gate: compile and all 218 tests (~10 s)
 ./mvnw -q test -Dgroups=contract        # contract tests E1–E10 only
 ./mvnw -q test -Dtest=ContractE05FairnessTest
 ```
+
+## Run the demo
+
+A small end-to-end run on fake data: the Planner, the three lanes, two executor tasks on virtual threads and a fake Tracking Service consumer. Durations are scaled 1000× down (C = 50, N = 2, firm cap 5), so a 1-minute load takes 5 ms and the run finishes in about a second.
+
+```bash
+./mvnw -q test-compile
+java -cp target/classes:target/test-classes com.caseware.fanout.demo.Demo
+```
+
+The scenario:
+- **Data:** 300 known rows; one firm with 1,500 unknown engagements; 20 small firms with 10 each.
+- **v7 published, twice:** the duplicate is ignored. Four engagements are throttled once; three are `NotFound`.
+- **v8 published on the same branch after v7 finishes:** its loads coalesce onto v7's observations, which are still fresh.
+
+Typical output (abridged):
+
+```
+Stage A - Planner
+  v7 published: 3 ApplyHeadBatch commands (<= 100 known rows each), 1700 load requests
+  duplicate v7 event -> DUPLICATE (one job, one planning pass)
+Stage B - Load Executor
+  loader calls            1707   (1700 unique engagements + 4 throttled retries + v8)
+  peak concurrent calls     50   (limit C = 50)
+  peak calls, big firm      10   (limit cap x N = 10)
+  v8 loads coalesced      1697   (still fresh from v7: no reload)
+  dead-lettered              6   (NotFound: eng-small-3-0, eng-small-7-0, eng-small-11-0)
+Jobs
+  prod-1:br-1:v7:1         COMPLETE  expected 1700  done 1697  dlq 3
+  prod-1:br-1:v8:2         COMPLETE  expected 1700  done 1697  dlq 3
+```
+
+The demo lives in test sources (`com.caseware.fanout.demo.Demo`) because it is built from the test fakes; main code ships no test doubles. `DemoTest` runs it in the build and checks the same numbers.
 
 ## Layout
 
@@ -29,7 +62,7 @@ com.caseware.fanout
   planner         Planner, PlannerConfig
   adapter.memory  in-memory SQS / DynamoDB / bus stand-ins, semaphore limiter, virtual-thread scheduler
 test: testkit (MutableClock, ManualScheduler, FakeEngagementLoader, CrashInjector, ExecutorHarness,
-      FakeTrackingServiceConsumer), contract (ContractE01…E10), unit tests mirroring main
+      FakeTrackingServiceConsumer), contract (ContractE01…E10), demo (Demo, DemoTest), unit tests mirroring main
 ```
 
 ## How the code maps to the contract

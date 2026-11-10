@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 A Caseware take-home assignment in two parts:
 
 - **Part 1, the design (done):** a system that flags engagements when a new template version is published, without loading engagements on any user-facing path. Each engagement load costs ~1 min through another team's capacity-limited loader. The design is written in Markdown with Mermaid diagrams.
-- **Part 2, the code (done):** a Java 21 implementation in `fanout-java/` of the **Load Executor** (Stage B of the fan-out worker) plus a **thin Planner** (Stage A). All 17 stories are done, contract tests E1–E10 are green, and the suite has 217 tests (~10 s). Overview and tradeoffs: `fanout-java/README.md`. Stories and status: `fanout-java/stories/index.md`; review and §D coverage: `fanout-java/docs/requirements.md` §7–§8.
+- **Part 2, the code (done):** a Java 21 implementation in `fanout-java/` of the **Load Executor** (Stage B of the fan-out worker) plus a **thin Planner** (Stage A). All 17 stories are done, contract tests E1–E10 are green, and the suite has 218 tests (~10 s). Overview and tradeoffs: `fanout-java/README.md`. Stories and status: `fanout-java/stories/index.md`; review and §D coverage: `fanout-java/docs/requirements.md` §7–§8.
 
 ## Commands (Part 2)
 
@@ -19,6 +19,7 @@ Run from `fanout-java/`. Maven wrapper pins Maven 3.9.10; JDK 21 required.
 - Contract tests only (§E, `@Tag("contract")`): `./mvnw -q test -Dgroups=contract`
 - Everything except contract tests: `./mvnw -q test -DexcludedGroups=contract`
 - Reports: `target/surefire-reports/`
+- Demo on fake data: `./mvnw -q test-compile && java -cp target/classes:target/test-classes com.caseware.fanout.demo.Demo` (lives in test sources; `DemoTest` keeps it working)
 - E1, E4 and E5 run in real time on virtual threads (plus a few concurrency unit tests); the rest run deterministically under `MutableClock` + `ManualScheduler`.
 
 ## Layout and source of truth
