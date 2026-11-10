@@ -2,7 +2,7 @@
 
 - **Epic:** E2 Adapters & test kit
 - **Priority:** Must
-- **Status:** To do
+- **Status:** Done
 - **Depends on:** 02
 - **Contract refs:** §B ConcurrencyLimiter, §C lanes and fairness, §F static permit split
 - **Contract tests:** groundwork E1
@@ -22,8 +22,8 @@ Covers FR-13, FR-14, FR-06. Applies G-02, G-15.
 - AC5 — Given `C=50, N=4`, Then 12 permits per task and firm cap 2; given `C=10, N=4`, firm cap 1 (→ EC-11, EC-12).
 
 ## Tasks
-- [ ] `SemaphoreConcurrencyLimiter` with per-firm counters; in-use counter (NFR-10).
-- [ ] Unit + concurrency tests.
+- [x] `SemaphoreConcurrencyLimiter` with per-firm counters; in-use counter (NFR-10).
+- [x] Unit + concurrency tests.
 
 ## Out of scope
 - Global (cross-task) limiter (§F upgrade path).
@@ -33,4 +33,9 @@ Covers FR-13, FR-14, FR-06. Applies G-02, G-15.
   card, index and traceability matrix updated; commit created.
 
 ## Notes / decisions
-<Filled during implementation.>
+- AC → test (`SemaphoreConcurrencyLimiterTest`): AC1 `budgetExhausted`; AC2 `firmCap`; AC3 `doubleCloseReleasesOnce`, `releasedOnException`; AC4 `hammer` (200 virtual threads × 500 attempts, 25 permits, cap 5, 10 firms; invariants measured by counters outside the limiter); AC5 `forTaskSizing`. 5/5 runs green.
+- Tests and implementation were written in one step, so red-first was not observed; instead two mutants were run and both were detected: firm-cap check removed (`hammer` fails) and close guard removed (`doubleCloseReleasesOnce` fails).
+- Acquire order: firm slot (`ConcurrentHashMap.compute`, increments only below the cap) then `Semaphore.tryAcquire()`; the firm slot is rolled back if the semaphore is empty. Firm entries are removed at 0, so the map does not grow with firm count.
+- `forTask(ExecutorConfig)` uses `permitsPerTask()` and `firmCap()` from story 03 (single source of the sizing formulas).
+- Observability (NFR-10): `inUse()`, `inUse(firm)`, `freePermits()` on the adapter.
+- **Open for story 08:** G-24 sizes receives with `freePermits`, but the `ConcurrencyLimiter` port (§B) only has `tryAcquire`. The executor depends on the port, so story 08 needs `int freePermits()` on the port (additive signature change, to log under G-24) — or a different receive-sizing rule.
