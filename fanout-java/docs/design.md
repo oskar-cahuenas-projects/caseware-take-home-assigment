@@ -50,7 +50,7 @@ com.caseware.fanout
   port            WorkQueue, Delivery, LoadLedger, Claim, ConcurrencyLimiter, Permit, FanoutJobStore,
                   EngagementLoader, ObservationPublisher, CandidateSource, Scheduler
   executor        LoadExecutor, LanePoller, LaneQueues, CircuitBreaker, Backoff, Heartbeat, ExecutorConfig, ExecutorFactory
-  planner         Planner (story 14)
+  planner         Planner, PlannerConfig (story 14)
   adapter.memory  InMemoryWorkQueue, InMemoryLoadLedger, SemaphoreConcurrencyLimiter,
                   InMemoryFanoutJobStore, InMemoryObservationPublisher, VirtualThreadScheduler
 test: testkit (MutableClock, ManualScheduler, FakeEngagementLoader, CrashInjector, Await,
@@ -68,6 +68,7 @@ test: testkit (MutableClock, ManualScheduler, FakeEngagementLoader, CrashInjecto
 | `Backoff` | Delay for a retry or deferral: full jitter, `retryAfter` floor, 15-min cap (G-12, G-16, G-24). Strategy. |
 | `Heartbeat` | Schedules `extendVisibility` every interval; cancelled in `finally` (§C). |
 | `ExecutorConfig` | Every duration and number; `production()` and `forTests()`; validates G-14, G-15. |
+| `Planner` | Stage A: event → job (`createIfAbsent`), lease renewed per page, supersession check per page, `ApplyHeadBatch` ≤ 100 + PUBLISH `LoadRequest`s, `savePage` after sends, `Cursor.END` before `markPlanned` (G-25, G-29). |
 | `ExecutorFactory` | Wires N executors with shared adapters and per-task limiter and breaker (G-15). |
 | `InMemory*` adapters | Mimic SQS/DynamoDB semantics atomically (§5). |
 

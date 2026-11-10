@@ -6,6 +6,13 @@ import com.caseware.fanout.adapter.memory.InMemoryFanoutJobStore;
 import com.caseware.fanout.domain.FanoutJob;
 import com.caseware.fanout.domain.JobStatus;
 import com.caseware.fanout.domain.Outcome;
+import com.caseware.fanout.domain.ProjectionStatus;
+import com.caseware.fanout.domain.TemplateVersionEvent;
+import com.caseware.fanout.executor.ExecutorConfig;
+import com.caseware.fanout.planner.Planner;
+import com.caseware.fanout.testkit.ExecutorHarness;
+import com.caseware.fanout.testkit.MutableClock;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -16,14 +23,14 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
-/** Contract §E 8. Outcome half (story 07); the duplicate-event half is added by the Planner (story 14). */
+/** Contract §E 8. Outcome half (story 07) and duplicate-event half (story 14, Planner). */
 @Tag("contract")
 @Timeout(value = 10, unit = TimeUnit.SECONDS)
 class ContractE08JobIdempotencyTest {
 
     private static final Outcome[] OUTCOMES = {Outcome.DONE, Outcome.COALESCED, Outcome.DLQ};
 
-    private final InMemoryFanoutJobStore store = new InMemoryFanoutJobStore();
+    private final InMemoryFanoutJobStore store = new InMemoryFanoutJobStore(new MutableClock(Instant.parse("2026-11-09T10:00:00Z")));
 
     @Test
     @DisplayName("E8 job idempotency: duplicate outcomes leave the counters exact")
@@ -76,5 +83,26 @@ class ContractE08JobIdempotencyTest {
                 .filter(i -> store.outcome("job-1", "e" + i).orElseThrow() == Outcome.DLQ).count();
         assertThat(j.loadsDlq()).isEqualTo((int) dlq);
         assertThat(j.status()).isEqualTo(JobStatus.COMPLETE);
+    }
+
+    @Test
+    @DisplayName("E8 job idempotency: a duplicate publish event → one job and one planning pass, by the same or another planner")
+    void duplicateEvents() {
+        try (var h = ExecutorHarness.deterministic(ExecutorConfig.production())) {
+            h.addCandidates(3, ProjectionStatus.KNOWN);
+            h.addCandidates(2, ProjectionStatus.UNKNOWN);
+            TemplateVersionEvent e = h.templateEvent(TemplateVersionEvent.Kind.PUBLISHED, "v7", 1);
+
+            assertThat(h.planner("planner-a", 1_000).handle(e)).isEqualTo(Planner.Result.PLANNED);
+            assertThat(h.planner("planner-a", 1_000).handle(e)).isEqualTo(Planner.Result.DUPLICATE);
+            assertThat(h.planner("planner-b", 1_000).handle(e)).isEqualTo(Planner.Result.DUPLICATE);
+
+            assertThat(h.commands).singleElement().satisfies(b -> assertThat(b.engagementIds()).hasSize(3));
+            assertThat(h.queue.depth()).isEqualTo(2);
+            FanoutJob job = h.jobs.find(e.jobId()).orElseThrow();
+            assertThat(job.loadsExpected()).isEqualTo(2);
+            assertThat(job.flagBatchesSent()).isEqualTo(1);
+            assertThat(job.status()).isEqualTo(JobStatus.PLANNED);
+        }
     }
 }

@@ -4,6 +4,8 @@ package com.caseware.fanout.domain;
 public record Cursor(String token) {
 
     public static final Cursor START = new Cursor("start");
+    /** Saved with the last page, so a restarted planner goes straight to {@code markPlanned} (G-29). */
+    public static final Cursor END = new Cursor("end");
 
     public Cursor {
         Checks.nonBlank(token, "token");

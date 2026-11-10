@@ -35,6 +35,7 @@
 | G-26 | Envelope fields | Add `schemaVersion`, `region` where missing | Added fields | Approved |
 | G-27 | Breaker scope | One breaker per executor task | — | Approved |
 | G-28 | Hard-timeout enforcement | Executor schedules the timeout and interrupts; loader also gets `timeout` | — | Approved |
+| G-29 | Planner producer side | `MessageSink<T>` port; `advanceGraphRev`; `Cursor.END`; store gets a `Clock` | Added port, method, constant | Applied (story 14), pending owner review |
 
 ## Entries
 
@@ -204,3 +205,10 @@ Evaluated atomically, first match wins:
 - **Recommendation [R]:** The executor passes `timeout` to the loader **and** schedules a timeout task on the `Scheduler` that interrupts the loading virtual thread. A timed-out call is `Transient`; any late result is discarded. The permit is released only when the loader call actually returns, so the capacity invariant counts real concurrent calls even if a loader ignores interruption (A8).
 - **Options considered:** `Future.get(timeout)` (real-time wait, not controllable by `MutableClock`; rejected).
 - **Status:** Approved.
+
+### G-29 — Planner producer side and graphRev write path
+- **Ref:** §A I3, I4; §C Planner; G-25.
+- **Problem:** (1) `WorkQueue` is the consumer port, and the Planner needs to *send* `ApplyHeadBatch` (I3) and `LoadRequest` (I4). (2) G-25's `latestGraphRev(productId, branchId)` has no write path, and `FanoutJob` carries neither field. (3) After the last page there is no "next" cursor: saving the current one would re-send and re-count the last page after a crash before `markPlanned`. (4) Lease expiry needs "now" inside the store.
+- **Options:** (1) a producer port vs. letting the Planner see `InMemoryWorkQueue`; (2) `advanceGraphRev` vs. parsing `jobId`; (3) `Cursor.END` vs. `Optional<Cursor>` in `savePage`, which would change G-25's signature.
+- **Recommendation [R]:** `port.MessageSink<T> { void send(T) }`, implemented by `InMemoryWorkQueue`; `FanoutJobStore.advanceGraphRev(productId, branchId, graphRev)` (monotonic max, a separate item per branch in DynamoDB); `Cursor.END` saved with the last page, so a restart goes straight to `markPlanned`; `InMemoryFanoutJobStore(Clock)`. The G-25 signatures are unchanged. `savePage` throws `IllegalStateException` when the caller no longer holds the lease.
+- **Status:** Applied in story 14 within the card's tasks (in-memory command sink, G-25 additions); flagged for owner review.

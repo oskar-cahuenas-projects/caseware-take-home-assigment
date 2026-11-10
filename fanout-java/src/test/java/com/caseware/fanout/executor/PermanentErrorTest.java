@@ -49,7 +49,7 @@ class PermanentErrorTest {
         var ports = new ExecutorPorts(
                 new RecordingPorts.RecordingQueue(queue, calls),
                 new RecordingPorts.RecordingLedger(new InMemoryLoadLedger(clock), calls),
-                new RecordingPorts.RecordingJobs(new InMemoryFanoutJobStore(), calls),
+                new RecordingPorts.RecordingJobs(new InMemoryFanoutJobStore(clock), calls),
                 new RecordingPorts.RecordingPublisher(new InMemoryObservationPublisher(), calls),
                 new RecordingPorts.RecordingLoader(loader, calls), new ManualScheduler(clock), clock);
         var limiter = new RecordingPorts.RecordingLimiter(new SemaphoreConcurrencyLimiter(25, 5), calls);

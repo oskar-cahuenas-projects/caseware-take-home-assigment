@@ -51,7 +51,7 @@ class LoadExecutorTest {
         List<String> calls = new CopyOnWriteArrayList<>();
         MutableClock clock = new MutableClock(Instant.parse("2026-11-09T10:00:00Z"));
         var queue = new InMemoryWorkQueue<LoadRequest>("publish", clock, CONFIG.visibilityTimeout(), 5, CONFIG.maxRequeueDelay());
-        var jobs = new InMemoryFanoutJobStore();
+        var jobs = new InMemoryFanoutJobStore(clock);
         var ports = new ExecutorPorts(
                 new RecordingPorts.RecordingQueue(queue, calls), new RecordingPorts.RecordingLedger(new InMemoryLoadLedger(clock), calls),
                 new RecordingPorts.RecordingJobs(jobs, calls), new RecordingPorts.RecordingPublisher(new InMemoryObservationPublisher(), calls),

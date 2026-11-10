@@ -2,7 +2,7 @@
 
 - **Epic:** E6 Planner (stretch)
 - **Priority:** Should
-- **Status:** To do
+- **Status:** Done
 - **Depends on:** 07, 13
 - **Contract refs:** §A I1–I4, §B TemplateVersionEvent/CandidateSource/ApplyHeadBatch, §C Planner, §D rows 1–3, 9
 - **Contract tests:** E8 (duplicate events), E9
@@ -22,9 +22,9 @@ Covers FR-22 – FR-25. Applies G-08, G-25.
 - AC5 — Given a withdraw at a higher `graphRev`, Then the old planner stops at the next page, its job is `SUPERSEDED`, and its queued loads still complete (→ FR-25, E9).
 
 ## Tasks
-- [ ] `Planner`, `InMemoryCandidateSource`, in-memory command sink.
-- [ ] `FanoutJobStore` additions per G-25.
-- [ ] `ContractE08JobIdempotencyTest` (event half), `ContractE09SupersessionTest`.
+- [x] `Planner`, `InMemoryCandidateSource`, in-memory command sink.
+- [x] `FanoutJobStore` additions per G-25.
+- [x] `ContractE08JobIdempotencyTest` (event half), `ContractE09SupersessionTest`.
 
 ## Out of scope
 - Real Tracking Service query API, GSI lag (§A I2).
@@ -34,4 +34,10 @@ Covers FR-22 – FR-25. Applies G-08, G-25.
   card, index and traceability matrix updated; commit created.
 
 ## Notes / decisions
-<Filled during implementation.>
+- AC → test: AC1 `ContractE08JobIdempotencyTest#duplicateEvents` (same and different planner); AC2 `PlannerTest#oneLeaseHolder`; AC3 `PlannerTest#splitsKnownAndUnknown` (250 known → 100/100/50; 50 UNKNOWN + UNVERIFIED → PUBLISH loads; counters), `#cursorSavedAfterSends`; AC4 `PlannerTest#crashResumesFromCursor` (page 2 re-sent, `loadsExpected` exact), `#crashAfterLastSave`; AC5 `ContractE09SupersessionTest` (withdraw mid-run: old job stops after page 1, `SUPERSEDED`, its 5 loads complete; the new job's overlapping loads coalesce; late lower `graphRev`). Store units in `InMemoryFanoutJobStoreTest`. 5/5 runs green.
+- **G-29 (new, flagged for owner review):** `MessageSink<T>` producer port (`InMemoryWorkQueue` implements it; tests use a list for I3); `FanoutJobStore.advanceGraphRev` as the write path for G-25's `latestGraphRev`; `Cursor.END` saved with the last page, so a crash before `markPlanned` doesn't re-count the last page; `InMemoryFanoutJobStore(Clock)` for lease expiry. G-25 signatures unchanged. `savePage`'s `flagBatchesSent` is an increment.
+- `Planner.handle(event)` returns `PLANNED | DUPLICATE | LEASE_HELD | SUPERSEDED`. A send failure propagates (event not acked → redelivery resumes from the cursor). No receive loop over `template-events`: the thin Planner is driven by its caller.
+- Deterministic `requestId = jobId:engagementId`, so a re-sent page produces the same request IDs (and the same A1-false fallback `eventId`).
+- Withdraw and publish plan identically: the event creates a job at its `graphRev`; the Tracking Service recomputes the head from `ApplyHeadBatch.graphRev`.
+- A `SUPERSEDED` job keeps counting outcomes but never becomes `COMPLETE` (terminal). Its loads still run and inform the newer job via coalescing.
+- Out of scope, as on the card: A2 null-template rows → backfill lane; GSI lag.

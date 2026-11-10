@@ -189,10 +189,10 @@ Test column is filled in by each story.
 | FR-19 | 07, 11 | `InMemoryFanoutJobStoreTest`, `ContractE08JobIdempotencyTest` (07), `ContractE06PermanentErrorTest#mixedJobClosesOnRule` (11) |
 | FR-20 | 04 | `InMemoryWorkQueueTest` |
 | FR-21 | 05 | `InMemoryLoadLedgerTest` |
-| FR-22 | 14 | |
-| FR-23 | 14 | |
-| FR-24 | 14 | |
-| FR-25 | 14 | |
+| FR-22 | 14 | `ContractE08JobIdempotencyTest#duplicateEvents` |
+| FR-23 | 14 | `PlannerTest#oneLeaseHolder`, `InMemoryFanoutJobStoreTest#plannerLease` |
+| FR-24 | 14 | `PlannerTest#splitsKnownAndUnknown`, `#cursorSavedAfterSends`, `#crashResumesFromCursor`, `#crashAfterLastSave`, `InMemoryFanoutJobStoreTest#savePageConditionalOnLease` |
+| FR-25 | 14 | `ContractE09SupersessionTest`, `InMemoryFanoutJobStoreTest#markSuperseded`, `#graphRevIsMonotonic` |
 | FR-26 | 15 | `ContractE10TrackingServiceConsumerTest` (rules + events from real executor runs) |
 | NFR-01 | 08 | `ContractE01CapacityInvariantTest` |
 | NFR-02 | 09, 10, 11 | `ContractE03CrashInjectionTest#crashMidBatch` (09), `ContractE04ThrottlingNoDlqTest` (10), `ContractE06PermanentErrorTest` (11) |

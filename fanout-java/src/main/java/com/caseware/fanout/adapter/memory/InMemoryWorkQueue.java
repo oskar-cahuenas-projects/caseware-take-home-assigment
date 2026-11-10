@@ -4,6 +4,7 @@ import static java.lang.System.Logger.Level.INFO;
 import static java.lang.System.Logger.Level.WARNING;
 
 import com.caseware.fanout.port.Delivery;
+import com.caseware.fanout.port.MessageSink;
 import com.caseware.fanout.port.WorkQueue;
 import java.time.Clock;
 import java.time.Duration;
@@ -23,7 +24,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * blocks: {@code wait} is accepted for port compatibility and ignored, and callers idle on the scheduler
  * instead. Thread-safe: every operation runs under one {@link ReentrantLock}.
  */
-public final class InMemoryWorkQueue<T> implements WorkQueue<T> {
+public final class InMemoryWorkQueue<T> implements WorkQueue<T>, MessageSink<T> {
 
     private static final System.Logger LOG = System.getLogger(InMemoryWorkQueue.class.getName());
 
@@ -55,7 +56,8 @@ public final class InMemoryWorkQueue<T> implements WorkQueue<T> {
         this.maxDelay = requirePositive(maxDelay, "maxDelay");
     }
 
-    /** Producer side (not part of the consumer port): enqueue a new message, visible now. */
+    /** Producer side ({@link MessageSink}, G-29): enqueue a new message, visible now. */
+    @Override
     public void send(T body) {
         send(body, Duration.ZERO);
     }

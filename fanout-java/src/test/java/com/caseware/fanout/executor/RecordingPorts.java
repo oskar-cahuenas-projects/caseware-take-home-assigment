@@ -1,6 +1,7 @@
 package com.caseware.fanout.executor;
 
 import com.caseware.fanout.adapter.memory.SemaphoreConcurrencyLimiter;
+import com.caseware.fanout.domain.Cursor;
 import com.caseware.fanout.domain.EngagementLoadFailed;
 import com.caseware.fanout.domain.EngagementStateObserved;
 import com.caseware.fanout.domain.EngagementTemplateState;
@@ -18,8 +19,10 @@ import com.caseware.fanout.port.ObservationPublisher;
 import com.caseware.fanout.port.Permit;
 import com.caseware.fanout.port.WorkQueue;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalLong;
 
 /** Port decorators that append each call's name to a shared list, for step-order assertions. */
 final class RecordingPorts {
@@ -47,6 +50,12 @@ final class RecordingPorts {
         public boolean createIfAbsent(FanoutJob job) { return d.createIfAbsent(job); }
         public void recordOutcome(String j, String e, Outcome o) { calls.add("outcome:" + o); d.recordOutcome(j, e, o); }
         public Optional<FanoutJob> find(String j) { return d.find(j); }
+        public boolean tryAcquirePlannerLease(String j, String o, Instant u) { return d.tryAcquirePlannerLease(j, o, u); }
+        public void savePage(String j, String o, Cursor c, int f, int l) { d.savePage(j, o, c, f, l); }
+        public void markPlanned(String j, String o) { d.markPlanned(j, o); }
+        public void markSuperseded(String j) { d.markSuperseded(j); }
+        public void advanceGraphRev(String p, String b, long r) { d.advanceGraphRev(p, b, r); }
+        public OptionalLong latestGraphRev(String p, String b) { return d.latestGraphRev(p, b); }
     }
 
     record RecordingPublisher(ObservationPublisher d, List<String> calls) implements ObservationPublisher {
