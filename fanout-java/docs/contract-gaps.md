@@ -3,7 +3,7 @@
 > Prompt A, Phase 4. Binding once `Approved` (master prompt §1.3, rank 4).
 > All entries were approved with their recommended option at Checkpoint 1 (2026-11-09, "apply default solution for all G's").
 > IDs G-17 and G-20 are unused: G-17 was folded into G-05 and G-20 into G-06.
-> **Signature changes** (contract §B differs): G-04, G-06, G-16, G-21, G-25, G-26. Each is additive except G-06.
+> **Signature changes** (contract §B differs): G-04, G-06, G-16, G-21, G-24, G-25, G-26. Each is additive except G-06.
 
 ## Summary
 
@@ -30,7 +30,7 @@
 | G-21 | Release on deferral | `LoadLedger.release(engagementId, workerId)` | Added method | Approved |
 | G-22 | Publish failure | No ack; redelivery hits `PendingPublish` | — | Approved |
 | G-23 | Poison messages | Unexpected `RuntimeException` → no ack → queue DLQ after 5 | — | Approved |
-| G-24 | Receive sizing, deferral delays | `receive(min(10, free permits))`; delays defined below | — | Approved |
+| G-24 | Receive sizing, deferral delays | `receive(min(10, free permits))`; delays defined below; `ConcurrencyLimiter.freePermits()` | Added method | Approved |
 | G-25 | Job store for the Planner | `find`, planner lease, `savePage`, `markPlanned`, `markSuperseded`, `latestGraphRev` | Added methods | Approved |
 | G-26 | Envelope fields | Add `schemaVersion`, `region` where missing | Added fields | Approved |
 | G-27 | Breaker scope | One breaker per executor task | — | Approved |
@@ -180,6 +180,7 @@ Evaluated atomically, first match wins:
 - **Status:** Approved.
 
 ### G-24 — Receive sizing and deferral delays
+- **Signature change (approved 2026-11-09, after story 06):** add `int freePermits()` to the `ConcurrencyLimiter` port so the executor sizes receives through the port. Implemented in story 08; `SemaphoreConcurrencyLimiter` already provides it.
 - **Recommendation [R]:** If the breaker blocks or `freePermits = 0`, skip receiving. Otherwise `receive(min(10, freePermits), wait)`. Delays: no-permit and firm-cap deferral = `firmCapDeferral` (production 30 s) × (1 + jitter[0,1)); `InFlightElsewhere` per G-05. All capped by G-12.
 - **Status:** Approved.
 

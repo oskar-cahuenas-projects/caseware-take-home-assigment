@@ -23,6 +23,7 @@ Covers FR-02 – FR-04, FR-06, FR-09, FR-13, FR-14, FR-16, NFR-01. Applies G-05,
 - AC6 — Given an observation of a different template, Then it is still published and the outcome is DONE (→ EC-17).
 
 ## Tasks
+- [ ] Add `int freePermits()` to the `ConcurrencyLimiter` port (G-24, approved); size each receive as `min(maxReceiveBatch, freePermits())`.
 - [ ] `LoadExecutor` (receive loop, per-message handler on virtual threads), `ExecutorFactory` wiring.
 - [ ] Multi-instance test harness.
 - [ ] `ContractE01CapacityInvariantTest`, `ContractE02CoalescingTest`.
