@@ -58,7 +58,7 @@ public final class SemaphoreConcurrencyLimiter implements ConcurrencyLimiter {
         return perFirm.getOrDefault(firmId, 0);
     }
 
-    /** Task permits free right now; sizes each receive (G-24). */
+    @Override
     public int freePermits() {
         return budget.availablePermits();
     }

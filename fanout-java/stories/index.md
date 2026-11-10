@@ -27,7 +27,7 @@ Requirements: [`../docs/requirements.md`](../docs/requirements.md) · Gaps: [`..
 | 05 | [In-memory load ledger](05-in-memory-load-ledger.md) | E2 | Must | Done | groundwork E2, E3 | None |
 | 06 | [Concurrency limiter](06-concurrency-limiter.md) | E2 | Must | Done | groundwork E1 | None |
 | 07 | [Job store, publisher and fake loader](07-job-store-publisher-and-fake-loader.md) | E2 | Must | Done | E8 (outcomes) | None |
-| 08 | [Executor core and step order](08-executor-core-step-order.md) | E3 | Must | To do | E1, E2 | None |
+| 08 | [Executor core and step order](08-executor-core-step-order.md) | E3 | Must | Done | E1, E2 | None |
 | 09 | [Crash recovery and outbox](09-crash-recovery-and-outbox.md) | E3 | Must | To do | E3 | None |
 | 10 | [Throttling, backoff and circuit breaker](10-throttling-backoff-circuit-breaker.md) | E4 | Must | To do | E4 | None |
 | 11 | [Permanent errors and DLQ](11-permanent-errors-and-dlq.md) | E4 | Must | To do | E6 | None |

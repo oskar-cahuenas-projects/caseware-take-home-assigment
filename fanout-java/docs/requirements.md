@@ -169,21 +169,21 @@ Test column is filled in by each story.
 | FR / NFR | Story | Test |
 |---|---|---|
 | FR-01 | 13 | |
-| FR-02 | 08 | |
-| FR-03 | 05, 08 | `InMemoryLoadLedgerTest#alreadyFresh` (05) |
-| FR-04 | 05, 08 | `InMemoryLoadLedgerTest#inFlightElsewhereThenClaimedAfterExpiry` (05) |
+| FR-02 | 08 | `LoadExecutorTest#stepOrder` |
+| FR-03 | 05, 08 | `InMemoryLoadLedgerTest#alreadyFresh` (05), `ContractE02CoalescingTest` (08) |
+| FR-04 | 05, 08 | `InMemoryLoadLedgerTest#inFlightElsewhereThenClaimedAfterExpiry` (05), `ContractE02CoalescingTest#duplicateMidLoad` (08) |
 | FR-05 | 09 | |
-| FR-06 | 06, 08, 13 | `SemaphoreConcurrencyLimiterTest#budgetExhausted` (06) |
+| FR-06 | 06, 08, 13 | `SemaphoreConcurrencyLimiterTest#budgetExhausted` (06), `LoadExecutorTest#noPermitDefers` (08) |
 | FR-07 | 12 | |
 | FR-08 | 12 | |
-| FR-09 | 08 | |
+| FR-09 | 08 | `LoadExecutorTest#stepOrder` |
 | FR-10 | 10 | |
 | FR-11 | 11 | |
 | FR-12 | 10 | |
-| FR-13 | 06, 08 | `SemaphoreConcurrencyLimiterTest#hammer`, `#firmCap` (06) |
-| FR-14 | 06, 08 | `SemaphoreConcurrencyLimiterTest#doubleCloseReleasesOnce`, `#releasedOnException` (06) |
+| FR-13 | 06, 08 | `SemaphoreConcurrencyLimiterTest#hammer`, `#firmCap` (06), `ContractE01CapacityInvariantTest` (08) |
+| FR-14 | 06, 08 | `SemaphoreConcurrencyLimiterTest#doubleCloseReleasesOnce`, `#releasedOnException` (06), `ContractE01CapacityInvariantTest` (08) |
 | FR-15 | 09 | |
-| FR-16 | 02, 05, 08 | `DomainBehaviourTest` (02), `InMemoryLoadLedgerTest#freshnessWithoutSequence` (05) |
+| FR-16 | 02, 05, 08 | `DomainBehaviourTest` (02), `InMemoryLoadLedgerTest#freshnessWithoutSequence` (05), `LoadExecutorTest#a1False` (08) |
 | FR-17 | 02, 07 | `EventPayloadPolicyTest`, `RecordValidationTest` (02), `InMemoryObservationPublisherTest` (07) |
 | FR-18 | 04, 11 | `InMemoryWorkQueueTest#maxReceiveCountDeadLetters` (04) |
 | FR-19 | 07, 11 | `InMemoryFanoutJobStoreTest`, `ContractE08JobIdempotencyTest` (07) |
@@ -194,7 +194,7 @@ Test column is filled in by each story.
 | FR-24 | 14 | |
 | FR-25 | 14 | |
 | FR-26 | 15 | |
-| NFR-01 | 08 | |
+| NFR-01 | 08 | `ContractE01CapacityInvariantTest` |
 | NFR-02 | 09, 10, 11 | |
 | NFR-03 | 09 | |
 | NFR-04 | 16 | |
