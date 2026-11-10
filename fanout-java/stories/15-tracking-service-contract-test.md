@@ -2,7 +2,7 @@
 
 - **Epic:** E6 Planner (stretch)
 - **Priority:** Should
-- **Status:** To do
+- **Status:** Done
 - **Depends on:** 08
 - **Contract refs:** §A I6, §D rows 7, 8, 10
 - **Contract tests:** E10
@@ -21,8 +21,8 @@ Covers FR-26. Applies G-06 (`seqKnown=false` fills `UNKNOWN` only).
 - AC4 — Given events produced by a real executor run (not hand-built), Then they satisfy AC1–AC3.
 
 ## Tasks
-- [ ] `FakeTrackingServiceConsumer` (test kit).
-- [ ] `ContractE10TrackingServiceConsumerTest`.
+- [x] `FakeTrackingServiceConsumer` (test kit).
+- [x] `ContractE10TrackingServiceConsumerTest`.
 
 ## Out of scope
 - Head computation and projection writes.
@@ -32,4 +32,7 @@ Covers FR-26. Applies G-06 (`seqKnown=false` fills `UNKNOWN` only).
   card, index and traceability matrix updated; commit created.
 
 ## Notes / decisions
-<Filled during implementation.>
+- AC → test (`ContractE10TrackingServiceConsumerTest`): AC1 `Rules#lowerSeqIgnored`; AC2 `Rules#duplicateEventIdNoOp`; AC3 `Rules#seqUnknownFillsUnknownOnly`; AC4 `FromExecutor#crashDuplicateIsNoOp` (crash after publish → republish with the same `eventId`), `#lowerSeqFromLaterLoadIgnored`, `#a1FalseFillsUnknownOnly`, `#loadFailedDeduped`. Also §D row 10, `Rules#differentTemplateApplied`.
+- Test-only story: no main code changed. The tests were red only at compile time (the fake is new); the executor already produced conforming events.
+- `FakeTrackingServiceConsumer` models one row per engagement, with fields `Optional` (empty = `UNKNOWN`) plus a sequence, and a seen-`eventId` set shared by both event types. The sequence guard is strict (`seq ≤ stored` → stale). `seqKnown=false` never changes the stored sequence.
+- Deterministic tests only; no concurrency, so the 5× rule doesn't apply.

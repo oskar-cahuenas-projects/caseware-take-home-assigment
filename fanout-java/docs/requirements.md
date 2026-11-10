@@ -183,7 +183,7 @@ Test column is filled in by each story.
 | FR-13 | 06, 08 | `SemaphoreConcurrencyLimiterTest#hammer`, `#firmCap` (06), `ContractE01CapacityInvariantTest` (08) |
 | FR-14 | 06, 08 | `SemaphoreConcurrencyLimiterTest#doubleCloseReleasesOnce`, `#releasedOnException` (06), `ContractE01CapacityInvariantTest` (08) |
 | FR-15 | 09 | `ContractE03CrashInjectionTest` |
-| FR-16 | 02, 05, 08 | `DomainBehaviourTest` (02), `InMemoryLoadLedgerTest#freshnessWithoutSequence` (05), `LoadExecutorTest#a1False` (08) |
+| FR-16 | 02, 05, 08, 15 | `DomainBehaviourTest` (02), `InMemoryLoadLedgerTest#freshnessWithoutSequence` (05), `LoadExecutorTest#a1False` (08), `ContractE10TrackingServiceConsumerTest#a1FalseFillsUnknownOnly` (15) |
 | FR-17 | 02, 07 | `EventPayloadPolicyTest`, `RecordValidationTest` (02), `InMemoryObservationPublisherTest` (07) |
 | FR-18 | 04, 11 | `InMemoryWorkQueueTest#maxReceiveCountDeadLetters` (04), `PoisonMessageTest` (11) |
 | FR-19 | 07, 11 | `InMemoryFanoutJobStoreTest`, `ContractE08JobIdempotencyTest` (07), `ContractE06PermanentErrorTest#mixedJobClosesOnRule` (11) |
@@ -193,7 +193,7 @@ Test column is filled in by each story.
 | FR-23 | 14 | |
 | FR-24 | 14 | |
 | FR-25 | 14 | |
-| FR-26 | 15 | |
+| FR-26 | 15 | `ContractE10TrackingServiceConsumerTest` (rules + events from real executor runs) |
 | NFR-01 | 08 | `ContractE01CapacityInvariantTest` |
 | NFR-02 | 09, 10, 11 | `ContractE03CrashInjectionTest#crashMidBatch` (09), `ContractE04ThrottlingNoDlqTest` (10), `ContractE06PermanentErrorTest` (11) |
 | NFR-03 | 09 | `ContractE03CrashInjectionTest` |
