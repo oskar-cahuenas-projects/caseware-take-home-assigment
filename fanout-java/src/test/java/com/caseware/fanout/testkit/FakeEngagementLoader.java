@@ -61,6 +61,14 @@ public final class FakeEngagementLoader implements EngagementLoader {
         static Step hang() {
             return new Hang();
         }
+
+        /**
+         * Ignores interruption: waits for {@link #releaseCalls()} (if calls are held), then succeeds with seq 1
+         * and keeps the interrupt flag (G-28 late-result tests).
+         */
+        static Step stubborn() {
+            return new Stubborn();
+        }
     }
 
     private record Ok(OptionalLong seq) implements Step { }
@@ -70,6 +78,8 @@ public final class FakeEngagementLoader implements EngagementLoader {
     private record Throw(RuntimeException error) implements Step { }
 
     private record Hang() implements Step { }
+
+    private record Stubborn() implements Step { }
 
     /** One loader call, in start order. */
     public record Call(String firmId, String engagementId) { }
@@ -127,14 +137,18 @@ public final class FakeEngagementLoader implements EngagementLoader {
         try {
             CountDownLatch g = gate;
             if (g != null) {
-                g.await();
+                if (step instanceof Stubborn) {
+                    awaitUninterruptibly(g);
+                } else {
+                    g.await();
+                }
             }
             if (latency.isPositive()) {
                 Thread.sleep(latency);
             }
             return switch (step) {
-                case Ok ok -> new EngagementTemplateState(engagementId, "tpl-1", "br-1", "v1", List.of(),
-                        ok.seq(), clock.instant());
+                case Ok ok -> state(engagementId, ok.seq());
+                case Stubborn st -> state(engagementId, OptionalLong.of(1));
                 case Fail f -> throw f.error().apply(engagementId);
                 case Throw t -> throw t.error();
                 case Hang h -> {
@@ -147,6 +161,25 @@ public final class FakeEngagementLoader implements EngagementLoader {
             throw new LoaderException.Transient(engagementId, e);
         } finally {
             exit(firmId);
+        }
+    }
+
+    private EngagementTemplateState state(String engagementId, OptionalLong seq) {
+        return new EngagementTemplateState(engagementId, "tpl-1", "br-1", "v1", List.of(), seq, clock.instant());
+    }
+
+    private static void awaitUninterruptibly(CountDownLatch g) {
+        boolean interrupted = false;
+        while (true) {
+            try {
+                g.await();
+                break;
+            } catch (InterruptedException e) {
+                interrupted = true;
+            }
+        }
+        if (interrupted) {
+            Thread.currentThread().interrupt();
         }
     }
 

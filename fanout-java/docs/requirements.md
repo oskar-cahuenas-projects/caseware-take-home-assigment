@@ -174,8 +174,8 @@ Test column is filled in by each story.
 | FR-04 | 05, 08 | `InMemoryLoadLedgerTest#inFlightElsewhereThenClaimedAfterExpiry` (05), `ContractE02CoalescingTest#duplicateMidLoad` (08) |
 | FR-05 | 09 | `ContractE03CrashInjectionTest`, `PublishFailureTest` |
 | FR-06 | 06, 08, 13 | `SemaphoreConcurrencyLimiterTest#budgetExhausted` (06), `LoadExecutorTest#noPermitDefers` (08) |
-| FR-07 | 12 | |
-| FR-08 | 12 | |
+| FR-07 | 12 | `HeartbeatTimeoutTest#hardTimeoutIsTransient`, `HeartbeatTimeoutTest#lateResultDiscardedPermitHeldUntilReturn` |
+| FR-08 | 12 | `ContractE07HeartbeatTest`, `HeartbeatTimeoutTest#heartbeatExtendsEveryInterval`, `HeartbeatTimeoutTest#cancelledOnEveryExitPath` |
 | FR-09 | 08 | `LoadExecutorTest#stepOrder` |
 | FR-10 | 10 | `ThrottlingTest`, `BackoffTest`, `ContractE04ThrottlingNoDlqTest` |
 | FR-11 | 11 | `PermanentErrorTest`, `ContractE06PermanentErrorTest` |

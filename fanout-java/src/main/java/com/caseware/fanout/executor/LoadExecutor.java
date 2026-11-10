@@ -216,7 +216,12 @@ public final class LoadExecutor implements AutoCloseable {
         }
     }
 
-    @SuppressWarnings("try") // the permit is held only for the loader call's duration
+    /**
+     * Steps 2–8. The permit, the visibility heartbeat and the hard timeout live exactly as long as the loader
+     * call (§C, G-28): they close in reverse order once the call returns, so the permit is released only when
+     * the call really ends. A result that arrives after the timeout fired is discarded as {@code Transient}.
+     */
+    @SuppressWarnings("try") // permit and heartbeat are resources scoped to the call, never referenced
     private boolean loadAndPublish(Delivery<LoadRequest> d, LoadRequest r) {
         Optional<Permit> permit = limiter.tryAcquire(r.firmId());                                   // 2
         if (permit.isEmpty()) {
@@ -226,8 +231,14 @@ public final class LoadExecutor implements AutoCloseable {
             return false;
         }
         EngagementTemplateState state;
-        try (Permit held = permit.get()) {
+        try (Permit held = permit.get();
+             Heartbeat heartbeat = new Heartbeat(ports.scheduler(), ports.queue(), d, config);
+             HardTimeout timeout = new HardTimeout(ports.scheduler(), config.loaderHardTimeout())) {
             state = ports.loader().load(r.firmId(), r.engagementId(), config.loaderHardTimeout());   // 3
+            if (timeout.fired()) {
+                log(r, "loader hard timeout, late result discarded");
+                throw new LoaderException.Transient(r.engagementId(), null);                         // G-28
+            }
         } catch (LoaderException e) {
             return onLoadFailure(d, r, e);                                                           // permit already released
         }

@@ -29,7 +29,7 @@ final class RecordingPorts {
 
     record RecordingQueue(WorkQueue<LoadRequest> d, List<String> calls) implements WorkQueue<LoadRequest> {
         public List<Delivery<LoadRequest>> receive(int max, Duration wait) { return d.receive(max, wait); }
-        public void extendVisibility(Delivery<LoadRequest> x, Duration by) { calls.add("extend"); d.extendVisibility(x, by); }
+        public void extendVisibility(Delivery<LoadRequest> x, Duration by) { calls.add("extend:" + by); d.extendVisibility(x, by); }
         public void ack(Delivery<LoadRequest> x) { calls.add("ack"); d.ack(x); }
         public void requeueWithDelay(Delivery<LoadRequest> x, Duration delay) { calls.add("requeue"); d.requeueWithDelay(x, delay); }
         public void requeueWithDelay(Delivery<LoadRequest> x, LoadRequest body, Duration delay) { calls.add("requeue"); d.requeueWithDelay(x, body, delay); }
