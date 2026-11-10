@@ -132,13 +132,19 @@ public final class InMemoryWorkQueue<T> implements WorkQueue<T> {
 
     @Override
     public void requeueWithDelay(Delivery<T> d, Duration delay) {
+        requeueWithDelay(d, d.body(), delay);
+    }
+
+    @Override
+    public void requeueWithDelay(Delivery<T> d, T body, Duration delay) {
+        Objects.requireNonNull(body, "body");
         requireNonNegative(delay, "delay");
         lock.lock();
         try {
             Message<T> m = byReceipt.remove(d.receipt());
             if (m != null) {
                 messages.remove(m);
-                enqueue(m.body, delay);
+                enqueue(body, delay);
             }
         } finally {
             lock.unlock();

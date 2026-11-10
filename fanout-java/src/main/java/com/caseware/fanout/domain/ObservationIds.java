@@ -14,4 +14,11 @@ public final class ObservationIds {
                 ? state.engagementId() + ":" + state.engagementSeq().getAsLong()
                 : state.engagementId() + ":obs:" + requestId;
     }
+
+    /** {@code engagementId:failed:<requestId>}; stable across retries because {@code requestId} is. */
+    public static String failure(String engagementId, String requestId) {
+        Checks.nonBlank(engagementId, "engagementId");
+        Checks.nonBlank(requestId, "requestId");
+        return engagementId + ":failed:" + requestId;
+    }
 }

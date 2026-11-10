@@ -177,9 +177,9 @@ Test column is filled in by each story.
 | FR-07 | 12 | |
 | FR-08 | 12 | |
 | FR-09 | 08 | `LoadExecutorTest#stepOrder` |
-| FR-10 | 10 | |
+| FR-10 | 10 | `ThrottlingTest`, `BackoffTest`, `ContractE04ThrottlingNoDlqTest` |
 | FR-11 | 11 | |
-| FR-12 | 10 | |
+| FR-12 | 10 | `CircuitBreakerTest`, `ThrottlingTest#breakerStopsReceiving`, `#halfOpenProbe` |
 | FR-13 | 06, 08 | `SemaphoreConcurrencyLimiterTest#hammer`, `#firmCap` (06), `ContractE01CapacityInvariantTest` (08) |
 | FR-14 | 06, 08 | `SemaphoreConcurrencyLimiterTest#doubleCloseReleasesOnce`, `#releasedOnException` (06), `ContractE01CapacityInvariantTest` (08) |
 | FR-15 | 09 | `ContractE03CrashInjectionTest` |
@@ -195,7 +195,7 @@ Test column is filled in by each story.
 | FR-25 | 14 | |
 | FR-26 | 15 | |
 | NFR-01 | 08 | `ContractE01CapacityInvariantTest` |
-| NFR-02 | 09, 10, 11 | `ContractE03CrashInjectionTest#crashMidBatch` (09) |
+| NFR-02 | 09, 10, 11 | `ContractE03CrashInjectionTest#crashMidBatch` (09), `ContractE04ThrottlingNoDlqTest` (10) |
 | NFR-03 | 09 | `ContractE03CrashInjectionTest` |
 | NFR-04 | 16 | |
 | NFR-05 | 16 | |
@@ -203,7 +203,7 @@ Test column is filled in by each story.
 | NFR-07 | 01 | `PomDependencyPolicyTest`, `BuildSmokeTest` |
 | NFR-08 | 03, 16 | `MainCodeTimeSourcesTest`, `ManualSchedulerTest`, `MutableClockTest` (03) |
 | NFR-09 | 16 | |
-| NFR-10 | 10, 13 | |
+| NFR-10 | 10, 13 | `ThrottlingTest` via `breakerState()` (10) |
 
 ### 6.3 Contract coverage
 

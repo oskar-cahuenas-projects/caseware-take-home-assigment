@@ -167,26 +167,6 @@ class LoadExecutorTest {
         }
     }
 
-    @Test
-    @DisplayName("interim (until stories 10/11): a loader failure releases claim and permit and leaves the message unacked")
-    void loaderFailureLeavesMessageForRedelivery() {
-        try (var h = ExecutorHarness.deterministic(CONFIG)) {
-            h.createJob("job-1", 1);
-            h.loader.script("eng-1", Step.transientFailure());
-            h.send("job-1", "firm-1", "eng-1");
-
-            h.executor(0).pollOnce();
-
-            assertThat(h.ledger.status("eng-1")).isEmpty();
-            assertThat(h.executor(0).limiter().freePermits()).isEqualTo(h.config.permitsPerTask());
-            assertThat(h.queue.depth()).isEqualTo(1);
-            h.mutableClock().advance(h.config.visibilityTimeout());
-            h.executor(0).pollOnce();
-            assertThat(h.jobs.outcome("job-1", "eng-1")).contains(Outcome.DONE);
-            assertThat(h.loader.calls("eng-1")).isEqualTo(2);
-        }
-    }
-
     // ---- recording decorators (AC1) ----
 
     private record RecordingQueue(WorkQueue<LoadRequest> d, List<String> calls) implements WorkQueue<LoadRequest> {
@@ -194,6 +174,7 @@ class LoadExecutorTest {
         public void extendVisibility(Delivery<LoadRequest> x, Duration by) { calls.add("extend"); d.extendVisibility(x, by); }
         public void ack(Delivery<LoadRequest> x) { calls.add("ack"); d.ack(x); }
         public void requeueWithDelay(Delivery<LoadRequest> x, Duration delay) { calls.add("requeue"); d.requeueWithDelay(x, delay); }
+        public void requeueWithDelay(Delivery<LoadRequest> x, LoadRequest body, Duration delay) { calls.add("requeue"); d.requeueWithDelay(x, body, delay); }
         public void deadLetter(Delivery<LoadRequest> x, String reason) { calls.add("deadLetter"); d.deadLetter(x, reason); }
     }
 

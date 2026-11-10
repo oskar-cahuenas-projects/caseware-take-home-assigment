@@ -114,6 +114,22 @@ class InMemoryWorkQueueTest {
     }
 
     @Test
+    @DisplayName("G-16: requeueWithDelay with a replacement body sends the new body as a new message")
+    void requeueWithReplacementBody() {
+        queue.send("a");
+        Delivery<String> d = receiveOne();
+
+        queue.requeueWithDelay(d, "a-attempt-1", Duration.ofSeconds(30));
+        queue.ack(d);                                                          // old receipt is dead
+
+        clock.advance(Duration.ofSeconds(30));
+        Delivery<String> fresh = receiveOne();
+        assertThat(fresh.body()).isEqualTo("a-attempt-1");
+        assertThat(fresh.receiveCount()).isEqualTo(1);
+        assertThat(queue.depth()).isEqualTo(1);
+    }
+
+    @Test
     @DisplayName("AC4: the receive after maxReceiveCount moves the message to the DLQ instead of delivering it")
     void maxReceiveCountDeadLetters() {
         queue.send("poison");

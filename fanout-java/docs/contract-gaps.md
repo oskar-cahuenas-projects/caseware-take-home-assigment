@@ -24,7 +24,7 @@
 | G-13 | Lane weighting | Smooth weighted round-robin, work-conserving | — | Approved |
 | G-14 | Ledger lease | `lease = hardTimeout + leaseMargin` (6 min) | — | Approved |
 | G-15 | N tasks | N executors in one JVM; `⌊C/N⌋` permits; `C < N` rejected | — | Approved |
-| G-16 | Transient retry bound | `attempt` field on `LoadRequest`; DLQ after 8 `Transient` | Added field | Approved |
+| G-16 | Transient retry bound | `attempt` field on `LoadRequest`; DLQ after 8 `Transient`; `WorkQueue.requeueWithDelay(d, body, delay)` | Added field, added method | Approved |
 | G-18 | E7 vs. hard timeout | E7 runs with `hardTimeout = 10 min` | — | Approved |
 | G-19 | Claim decision table | `PENDING_PUBLISH` > fresh > live lease > `Claimed` | — | Approved |
 | G-21 | Release on deferral | `LoadLedger.release(engagementId, workerId)` | Added method | Approved |
@@ -141,6 +141,7 @@
 - **Ref:** §C (requeue resets receive count), §D row 11, WBS-3.3 "bounded attempts".
 - **Problem:** Backoff needs an attempt count that survives `requeueWithDelay`; an engagement that always times out would loop forever.
 - **Options:** (a) `int attempt` in `LoadRequest`, bound on `Transient` only; (b) bound both; (c) no bound, rely on reconciliation.
+- **Signature change (approved 2026-11-09, story 10):** add `void requeueWithDelay(Delivery<T> d, T body, Duration delay)` to `WorkQueue`: same semantics as the two-argument form (new message, receive count resets, 15-min cap) but with a replacement body, so a `Transient` retry carries `withNextAttempt()`. Deferrals keep the two-argument form. `attempt` increments on `Transient` only; `Throttled` requeues the same body, so throttling never uses up the `Transient` budget.
 - **Recommendation [R]:** (a). `LoadRequest` gains `int attempt` (0 on first send; `withNextAttempt()` on retry). Backoff = full jitter over `min(maxDelay, base · 2^attempt)` (base 30 s production), at least `retryAfter` when throttled. `Transient` at `attempt ≥ maxTransientAttempts` (8) → `EngagementLoadFailed(TRANSIENT_EXHAUSTED)` + `deadLetter` + `recordOutcome(DLQ)`. `Throttled` never dead-letters (E4). Deferrals (G-05, G-24) do not increment `attempt`.
 - **Status:** Approved.
 

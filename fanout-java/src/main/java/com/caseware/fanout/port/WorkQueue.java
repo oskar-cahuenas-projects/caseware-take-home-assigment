@@ -24,6 +24,9 @@ public interface WorkQueue<T> {
      */
     void requeueWithDelay(Delivery<T> d, Duration delay);
 
+    /** As {@link #requeueWithDelay(Delivery, Duration)}, sending {@code body} instead (G-16: retry with {@code attempt + 1}). */
+    void requeueWithDelay(Delivery<T> d, T body, Duration delay);
+
     /** Moves the message to this lane's DLQ. Acts as the ack. */
     void deadLetter(Delivery<T> d, String reason);
 }
