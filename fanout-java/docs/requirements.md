@@ -146,7 +146,7 @@ G-06 is widened: with A1 false, `markPublished(engagementId, long observedSeq)` 
 | NFR-04 | Determinism: no flaky tests; concurrency tests pass 5/5 runs. | Must | Story 16 runs the suite 5 times. | |
 | NFR-05 | Full suite < 60 s. | Must | Surefire timing in story 16. | |
 | NFR-06 | Data residency: payloads and logs carry IDs and versions only. | Must | Review checklist; event records have no content fields. | |
-| NFR-07 | Java 21, no framework, no runtime dependencies. | Must | `pom.xml` has test-scope deps only. | |
+| NFR-07 | Java 21, no framework, no runtime dependencies. | Must | `pom.xml` has test-scope deps only. | `PomDependencyPolicyTest` |
 | NFR-08 | Main code uses only injected `Clock`, scheduler and `Random`. | Must | Build-time grep check in story 16 for `Instant.now(`, `currentTimeMillis`, `Thread.sleep`. | |
 | NFR-09 | Thread-safety stated in one Javadoc line per class. | Should | Review checklist. | |
 | NFR-10 | Minimal observability: in-memory counters for permits in use, coalesced count, DLQ count, breaker state. | Could | Read by tests (§F Observability). | |
@@ -200,7 +200,7 @@ Test column is filled in by each story.
 | NFR-04 | 16 | |
 | NFR-05 | 16 | |
 | NFR-06 | 02, 16 | |
-| NFR-07 | 01 | |
+| NFR-07 | 01 | `PomDependencyPolicyTest`, `BuildSmokeTest` |
 | NFR-08 | 03, 16 | |
 | NFR-09 | 16 | |
 | NFR-10 | 10, 13 | |

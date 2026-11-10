@@ -7,7 +7,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 A Caseware take-home assignment in two parts:
 
 - **Part 1, the design (done):** a system that flags engagements when a new template version is published, without loading engagements on any user-facing path. Each engagement load costs ~1 min through another team's capacity-limited loader. The design is written in Markdown with Mermaid diagrams.
-- **Part 2, the code (not started):** a Java 21 implementation of the **Load Executor** (Stage B of the fan-out worker), in `fanout-java/`. There is no source code, build file, or test suite yet, so there are no build, lint, or test commands. When you scaffold the project, add its commands to this file.
+- **Part 2, the code (in progress):** a Java 21 implementation of the **Load Executor** (Stage B of the fan-out worker), in `fanout-java/`. Stories and status: `fanout-java/stories/index.md`.
+
+## Commands (Part 2)
+
+Run from `fanout-java/`. Maven wrapper pins Maven 3.9.10; JDK 21 required.
+
+- Full build and tests (the build gate): `./mvnw -q verify`
+- Tests only: `./mvnw -q test`
+- One test class: `./mvnw -q test -Dtest=BuildSmokeTest` (one method: `-Dtest=BuildSmokeTest#runsOnJava21`)
+- Contract tests only (§E, `@Tag("contract")`): `./mvnw -q test -Dgroups=contract`
+- Everything except contract tests: `./mvnw -q test -DexcludedGroups=contract`
+- Reports: `target/surefire-reports/`
 
 ## Layout and source of truth
 

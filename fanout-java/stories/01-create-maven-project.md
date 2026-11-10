@@ -2,7 +2,7 @@
 
 - **Epic:** E0 Setup
 - **Priority:** Must
-- **Status:** To do
+- **Status:** Done
 - **Depends on:** None
 - **Contract refs:** §0 A5, §F (in-memory adapters)
 - **Contract tests:** None
@@ -21,10 +21,10 @@ Fixes the stack (NFR-07). No runtime dependencies; JUnit 5 and AssertJ in test s
 - AC4 — Given the root `CLAUDE.md`, Then it lists the build and test commands (incl. running one test class and the `contract` tag).
 
 ## Tasks
-- [ ] Maven wrapper, `pom.xml` (`maven.compiler.release=21`, Surefire, UTF-8).
-- [ ] Package skeleton `com.caseware.fanout.{domain,port,executor,planner,adapter.memory}` (package-info only).
-- [ ] Smoke test.
-- [ ] Commands in root `CLAUDE.md`.
+- [x] Maven wrapper, `pom.xml` (`maven.compiler.release=21`, Surefire, UTF-8).
+- [x] Package skeleton `com.caseware.fanout.{domain,port,executor,planner,adapter.memory}` (package-info only).
+- [x] Smoke test.
+- [x] Commands in root `CLAUDE.md`.
 
 ## Out of scope
 - Any domain or port type (story 02).
@@ -34,4 +34,7 @@ Fixes the stack (NFR-07). No runtime dependencies; JUnit 5 and AssertJ in test s
   card, index and traceability matrix updated; commit created.
 
 ## Notes / decisions
-<Filled during implementation.>
+- AC1 → `BuildSmokeTest#runsOnJava21`; AC2 → `PomDependencyPolicyTest` (parses `pom.xml`; verified it fails when AssertJ loses `test` scope); AC3 → `BuildSmokeTest#contractTaggedTestsRunByDefault` (`@Tag("contract")`; default run = 3 tests, `-Dgroups=contract` = 1); AC4 → root `CLAUDE.md` "Commands (Part 2)".
+- Versions (all already in the local Maven cache): Maven wrapper 3.3.4 (`only-script`) pinning Maven 3.9.10, JUnit BOM 5.13.4, AssertJ 3.27.7, compiler 3.14.1 (`-Xlint:all`), Surefire 3.5.4 with no group filters.
+- Added beyond the card: `PomDependencyPolicyTest` turns NFR-07 into an executable guard instead of a review item.
+- `target/` is already covered by the root `.gitignore`.
