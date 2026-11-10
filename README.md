@@ -17,5 +17,5 @@ The working notes behind each design section, one file per work package, are in 
 
 - **Part 1 (design):** I wrote [docs/solution-design.md](docs/solution-design.md) with Claude chat in the desktop app, using the Opus 5.5 model. I worked in one chat session per work package.
 - **Part 2 (implementation):** I am implementing the fan-out worker with Claude Code CLI in VS Code. The implementation follows the contract in [fanout-java/fanout-worker-contract.md](fanout-java/fanout-worker-contract.md). The Maven project is in [fanout-java/](fanout-java/).
-- **AI usage notes:** [ai-usage-notes.md](ai-usage-notes.md) explains where AI helped, where I corrected or ignored it, how I would guide other engineers, and where AI should not be trusted in this domain.
+- **AI usage notes:** [ai-usage-notes.md](docs/ai-usage-notes.md) explains where AI helped, where I corrected or ignored it, how I would guide other engineers, and where AI should not be trusted in this domain.
 - **Session logs:** the AI sessions, in Markdown format, are in [docs/chat-session-log/](docs/chat-session-log/).
