@@ -4,7 +4,7 @@ import com.caseware.fanout.domain.Candidate;
 import com.caseware.fanout.domain.Cursor;
 import com.caseware.fanout.domain.Page;
 
-/** Tracking Service query API (I2): paged, read-only, eventually consistent. */
+/** Tracking Service query API (I2): paged, read-only, eventually consistent. Implementations must be thread-safe. */
 public interface CandidateSource {
 
     /** @param cursor where to resume; {@link Cursor#START} for the first page */

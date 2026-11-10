@@ -3,7 +3,7 @@ package com.caseware.fanout.executor;
 /**
  * Seam for crash-injection tests (G-11): the executor calls {@link #at} after each durable step.
  * Production uses {@link #NONE}. An implementation simulates process death by throwing an {@link Error},
- * which the executor's {@code catch (Exception)} handlers do not intercept.
+ * which the executor's {@code catch (Exception)} handlers do not intercept. Implementations must be thread-safe.
  */
 @FunctionalInterface
 public interface CrashHook {

@@ -10,7 +10,7 @@ import com.caseware.fanout.port.WorkQueue;
 import java.time.Clock;
 import java.util.Objects;
 
-/** The ports every executor task in a cell shares (G-15). The limiter is per task and not included. */
+/** The ports every executor task in a cell shares (G-15). The limiter is per task and not included. Immutable. */
 public record ExecutorPorts(WorkQueue<LoadRequest> queue, LoadLedger ledger, FanoutJobStore jobs,
         ObservationPublisher publisher, EngagementLoader loader, Scheduler scheduler, Clock clock) {
 

@@ -6,6 +6,7 @@ import java.time.Duration;
 /**
  * Per-engagement load ledger (I7), keyed by {@code engagementId} only. It doubles as the observation
  * outbox: {@code LEASED → PENDING_PUBLISH → DONE}. Every method is an atomic conditional write.
+ * Implementations must be thread-safe.
  */
 public interface LoadLedger {
 

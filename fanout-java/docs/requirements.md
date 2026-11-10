@@ -109,47 +109,47 @@ G-06 is widened: with A1 false, `markPublished(engagementId, long observedSeq)` 
 
 | ID | Requirement | Source | Acceptance criterion | Verified by |
 |---|---|---|---|---|
-| FR-01 | Poll the three lanes with 6:3:1 weights, work-conserving. | §C lanes, G-13 | Over 100 receives with all lanes full, lane shares are 60/30/10 ± 1 slot; an empty lane's slots go to the others. | |
-| FR-02 | Claim the ledger entry first; act on each `Claim` variant. | §B, §C step 1 | Every message produces exactly one claim call before any permit or loader call. | |
-| FR-03 | `AlreadyFresh` → outcome COALESCED, ack, no loader call. | §D row 4, E2 | Duplicate and cross-version requests within W ⇒ exactly 1 loader call; all jobs counted. | |
-| FR-04 | `InFlightElsewhere` → defer without losing the item. | §D row 4, G-05 | Duplicate arriving mid-load is not loaded again and still gets an outcome after the load ends, even if the owner crashed. | |
-| FR-05 | `PendingPublish` → publish, `markPublished`, outcome, ack, with no loader call. | §D row 6, E3 | Crash after `recordObservation` ⇒ 0 extra loader calls; event published. | |
-| FR-06 | `Claimed` → acquire a permit; on no permit or firm at cap, release the claim and `requeueWithDelay` with jitter. | §C, G-21 | Deferred message is a new delivery with `receiveCount = 1`; ledger lease released. | |
-| FR-07 | Call the loader with a hard timeout; timeout ⇒ `Transient`. | §C heartbeat, G-28 | A load exceeding the timeout is requeued and its permit released. | |
-| FR-08 | While loading, extend visibility by 3 min every 60 s. | §C heartbeat, E7 | A load lasting 3 × visibility is never delivered to a second worker. | |
-| FR-09 | On success: `recordObservation` → publish `EngagementStateObserved` → `markPublished` → `recordOutcome(DONE)` → ack, in that order. | §C steps 4–8 | Recorded call order matches; event `eventId = engagementId:seq`; `jobIds` include the job. | |
-| FR-10 | `Throttled`/`Transient` → release permit, breaker failure, `requeueWithDelay` with exponential backoff + full jitter, honouring `retryAfter`, capped at 15 min. | §C, §D row 11, E4, G-12, G-16 | Sustained 429 ⇒ 0 DLQ messages; all items complete after throttling stops. | |
-| FR-11 | `NotFound`/`Permanent` → publish `EngagementLoadFailed`, `deadLetter`, `recordOutcome(DLQ)`. | §D row 13, E6 | Item in DLQ after 1 attempt; event emitted; job closes on `done + dlq = expected`. | |
-| FR-12 | Circuit breaker CLOSED/OPEN/HALF_OPEN; while OPEN the executor does not receive. | §C breaker, G-03, G-27 | While OPEN, queue `receive` call count stays constant; HALF_OPEN admits one probe. | |
-| FR-13 | Enforce `⌊C/N⌋` permits per task and the per-firm cap. | §C, E1 | Peak concurrent loader calls ≤ C; per firm ≤ cap × N. | |
-| FR-14 | Release every permit exactly once on every path. | G-02 | After any test, permits in use = 0; double close is a no-op. | |
-| FR-15 | Converge after a crash at any of the four points with ≤ 1 extra load and no lost item. | §D rows 5–7, E3 | Each crash point: all items DONE; loader calls ≤ items + crashes. | |
-| FR-16 | Stay safe when A1 is false. | §0 A1, G-06 | Without `engagementSeq`: fallback `eventId`, `seqKnown=false`, freshness by `observedAt`. | |
-| FR-17 | Events carry IDs, versions and the envelope (`schemaVersion`, `correlationId`, `region`). | §A envelope, G-26 | Event records contain no free-text content fields; envelope present on every event. | |
-| FR-18 | Unexpected exceptions: release permit, no ack; queue dead-letters after `maxReceiveCount = 5`. | §D row 14, G-23 | A request that always throws reaches the DLQ after exactly 5 receives. | |
-| FR-19 | Job store: `createIfAbsent` idempotent; `recordOutcome` idempotent per `(jobId, engagementId)`; load side closes on `done + dlq = expected`. | §B FanoutJob, §D rows 1, 16, E8 | Duplicate outcomes leave counters exact; status COMPLETE exactly when the rule holds. | |
+| FR-01 | Poll the three lanes with 6:3:1 weights, work-conserving. | §C lanes, G-13 | Over 100 receives with all lanes full, lane shares are 60/30/10 ± 1 slot; an empty lane's slots go to the others. | See §6.2 |
+| FR-02 | Claim the ledger entry first; act on each `Claim` variant. | §B, §C step 1 | Every message produces exactly one claim call before any permit or loader call. | See §6.2 |
+| FR-03 | `AlreadyFresh` → outcome COALESCED, ack, no loader call. | §D row 4, E2 | Duplicate and cross-version requests within W ⇒ exactly 1 loader call; all jobs counted. | See §6.2 |
+| FR-04 | `InFlightElsewhere` → defer without losing the item. | §D row 4, G-05 | Duplicate arriving mid-load is not loaded again and still gets an outcome after the load ends, even if the owner crashed. | See §6.2 |
+| FR-05 | `PendingPublish` → publish, `markPublished`, outcome, ack, with no loader call. | §D row 6, E3 | Crash after `recordObservation` ⇒ 0 extra loader calls; event published. | See §6.2 |
+| FR-06 | `Claimed` → acquire a permit; on no permit or firm at cap, release the claim and `requeueWithDelay` with jitter. | §C, G-21 | Deferred message is a new delivery with `receiveCount = 1`; ledger lease released. | See §6.2 |
+| FR-07 | Call the loader with a hard timeout; timeout ⇒ `Transient`. | §C heartbeat, G-28 | A load exceeding the timeout is requeued and its permit released. | See §6.2 |
+| FR-08 | While loading, extend visibility by 3 min every 60 s. | §C heartbeat, E7 | A load lasting 3 × visibility is never delivered to a second worker. | See §6.2 |
+| FR-09 | On success: `recordObservation` → publish `EngagementStateObserved` → `markPublished` → `recordOutcome(DONE)` → ack, in that order. | §C steps 4–8 | Recorded call order matches; event `eventId = engagementId:seq`; `jobIds` include the job. | See §6.2 |
+| FR-10 | `Throttled`/`Transient` → release permit, breaker failure, `requeueWithDelay` with exponential backoff + full jitter, honouring `retryAfter`, capped at 15 min. | §C, §D row 11, E4, G-12, G-16 | Sustained 429 ⇒ 0 DLQ messages; all items complete after throttling stops. | See §6.2 |
+| FR-11 | `NotFound`/`Permanent` → publish `EngagementLoadFailed`, `deadLetter`, `recordOutcome(DLQ)`. | §D row 13, E6 | Item in DLQ after 1 attempt; event emitted; job closes on `done + dlq = expected`. | See §6.2 |
+| FR-12 | Circuit breaker CLOSED/OPEN/HALF_OPEN; while OPEN the executor does not receive. | §C breaker, G-03, G-27 | While OPEN, queue `receive` call count stays constant; HALF_OPEN admits one probe. | See §6.2 |
+| FR-13 | Enforce `⌊C/N⌋` permits per task and the per-firm cap. | §C, E1 | Peak concurrent loader calls ≤ C; per firm ≤ cap × N. | See §6.2 |
+| FR-14 | Release every permit exactly once on every path. | G-02 | After any test, permits in use = 0; double close is a no-op. | See §6.2 |
+| FR-15 | Converge after a crash at any of the four points with ≤ 1 extra load and no lost item. | §D rows 5–7, E3 | Each crash point: all items DONE; loader calls ≤ items + crashes. | See §6.2 |
+| FR-16 | Stay safe when A1 is false. | §0 A1, G-06 | Without `engagementSeq`: fallback `eventId`, `seqKnown=false`, freshness by `observedAt`. | See §6.2 |
+| FR-17 | Events carry IDs, versions and the envelope (`schemaVersion`, `correlationId`, `region`). | §A envelope, G-26 | Event records contain no free-text content fields; envelope present on every event. | See §6.2 |
+| FR-18 | Unexpected exceptions: release permit, no ack; queue dead-letters after `maxReceiveCount = 5`. | §D row 14, G-23 | A request that always throws reaches the DLQ after exactly 5 receives. | See §6.2 |
+| FR-19 | Job store: `createIfAbsent` idempotent; `recordOutcome` idempotent per `(jobId, engagementId)`; load side closes on `done + dlq = expected`. | §B FanoutJob, §D rows 1, 16, E8 | Duplicate outcomes leave counters exact; status COMPLETE exactly when the rule holds. | See §6.2 |
 | FR-20 | In-memory `WorkQueue` mirrors SQS: visibility timeout, receive count, ack, `extendVisibility`, `requeueWithDelay` (new message), delay cap 15 min, DLQ per lane. | §B WorkQueue, §C | Unit tests per behaviour under `MutableClock`. | `InMemoryWorkQueueTest` |
-| FR-21 | In-memory `LoadLedger`: atomic claim with lease, W and `knownSeq`; `recordObservation` → `PENDING_PUBLISH`; `markPublished` → `DONE`; `release`. | §B LoadLedger, G-19, G-21 | Concurrent claims on one engagement ⇒ exactly one `Claimed`. | |
-| FR-22 | Planner (Should): deterministic `jobId`; duplicate event ⇒ one job. | §B, §D row 1, E8 | Two identical events ⇒ one job, one planning pass. | |
-| FR-23 | Planner: one planner per job via `plannerLease`. | §D row 3 | Two concurrent planners ⇒ one proceeds. | |
-| FR-24 | Planner: page candidates; known rows → `ApplyHeadBatch` ≤ 100 ids; `UNKNOWN`/`UNVERIFIED` → `LoadRequest` (PUBLISH lane); save cursor after sends. | §C Planner, §D row 2 | Batches ≤ 100; `loadsExpected` = number of load requests; resume after crash re-sends at most one page. | |
-| FR-25 | Planner: stop and mark `SUPERSEDED` when a higher `graphRev` exists; queued loads stay. | §C, §D row 9, E9 | Withdraw at higher `graphRev` stops the old planner; already-queued loads still complete. | |
-| FR-26 | Tracking Service consumer contract: lower-seq observation ignored; duplicate `eventId` no-op. | §D rows 7, 8, E10 | Fake consumer state unchanged by stale or duplicate events. | |
+| FR-21 | In-memory `LoadLedger`: atomic claim with lease, W and `knownSeq`; `recordObservation` → `PENDING_PUBLISH`; `markPublished` → `DONE`; `release`. | §B LoadLedger, G-19, G-21 | Concurrent claims on one engagement ⇒ exactly one `Claimed`. | See §6.2 |
+| FR-22 | Planner (Should): deterministic `jobId`; duplicate event ⇒ one job. | §B, §D row 1, E8 | Two identical events ⇒ one job, one planning pass. | See §6.2 |
+| FR-23 | Planner: one planner per job via `plannerLease`. | §D row 3 | Two concurrent planners ⇒ one proceeds. | See §6.2 |
+| FR-24 | Planner: page candidates; known rows → `ApplyHeadBatch` ≤ 100 ids; `UNKNOWN`/`UNVERIFIED` → `LoadRequest` (PUBLISH lane); save cursor after sends. | §C Planner, §D row 2 | Batches ≤ 100; `loadsExpected` = number of load requests; resume after crash re-sends at most one page. | See §6.2 |
+| FR-25 | Planner: stop and mark `SUPERSEDED` when a higher `graphRev` exists; queued loads stay. | §C, §D row 9, E9 | Withdraw at higher `graphRev` stops the old planner; already-queued loads still complete. | See §6.2 |
+| FR-26 | Tracking Service consumer contract: lower-seq observation ignored; duplicate `eventId` no-op. | §D rows 7, 8, E10 | Fake consumer state unchanged by stale or duplicate events. | See §6.2 |
 
 ## 5. Non-functional requirements
 
 | ID | Requirement | Priority | Acceptance criterion | Verified by |
 |---|---|---|---|---|
-| NFR-01 | Capacity invariant: peak concurrent loader calls ≤ C; per firm ≤ cap per task. | Must | E1 with N tasks, 10k requests. | |
-| NFR-02 | No lost work: every item ends DONE, COALESCED or in a DLQ. | Must | E3, E4, E6 end-state checks. | |
-| NFR-03 | At most one extra load per crash. | Must | E3. | |
-| NFR-04 | Determinism: no flaky tests; concurrency tests pass 5/5 runs. | Must | Story 16 runs the suite 5 times. | |
-| NFR-05 | Full suite < 60 s. | Must | Surefire timing in story 16. | |
-| NFR-06 | Data residency: payloads and logs carry IDs and versions only. | Must | Review checklist; event records have no content fields. | |
+| NFR-01 | Capacity invariant: peak concurrent loader calls ≤ C; per firm ≤ cap per task. | Must | E1 with N tasks, 10k requests. | See §6.2 |
+| NFR-02 | No lost work: every item ends DONE, COALESCED or in a DLQ. | Must | E3, E4, E6 end-state checks. | See §6.2 |
+| NFR-03 | At most one extra load per crash. | Must | E3. | See §6.2 |
+| NFR-04 | Determinism: no flaky tests; concurrency tests pass 5/5 runs. | Must | Story 16 runs the suite 5 times. | See §6.2 |
+| NFR-05 | Full suite < 60 s. | Must | Surefire timing in story 16. | See §6.2 |
+| NFR-06 | Data residency: payloads and logs carry IDs and versions only. | Must | Review checklist; event records have no content fields. | See §6.2 |
 | NFR-07 | Java 21, no framework, no runtime dependencies. | Must | `pom.xml` has test-scope deps only. | `PomDependencyPolicyTest` |
 | NFR-08 | Main code uses only injected `Clock`, scheduler and `Random`. | Must | Build-time grep check in story 16 for `Instant.now(`, `currentTimeMillis`, `Thread.sleep`. | `MainCodeTimeSourcesTest` |
-| NFR-09 | Thread-safety stated in one Javadoc line per class. | Should | Review checklist. | |
-| NFR-10 | Minimal observability: in-memory counters for permits in use, coalesced count, DLQ count, breaker state. | Could | Read by tests (§F Observability). | |
+| NFR-09 | Thread-safety stated in one Javadoc line per class. | Should | Review checklist. | See §6.2 |
+| NFR-10 | Minimal observability: in-memory counters for permits in use, coalesced count, DLQ count, breaker state. | Could | Read by tests (§F Observability). | See §6.2 |
 
 ## 6. Technical dependencies and traceability
 
@@ -164,7 +164,7 @@ G-06 is widened: with A1 false, `markPublished(engagementId, long observedSeq)` 
 
 ### 6.2 Traceability matrix
 
-Test column is filled in by each story.
+Test column filled in by each story; completed and checked in story 16 (every `Class#method` named here exists).
 
 | FR / NFR | Story | Test |
 |---|---|---|
@@ -197,12 +197,12 @@ Test column is filled in by each story.
 | NFR-01 | 08 | `ContractE01CapacityInvariantTest` |
 | NFR-02 | 09, 10, 11 | `ContractE03CrashInjectionTest#crashMidBatch` (09), `ContractE04ThrottlingNoDlqTest` (10), `ContractE06PermanentErrorTest` (11) |
 | NFR-03 | 09 | `ContractE03CrashInjectionTest` |
-| NFR-04 | 16 | |
-| NFR-05 | 16 | |
-| NFR-06 | 02, 16 | `EventPayloadPolicyTest` (02) |
+| NFR-04 | 16 | Full suite 5/5 green (217 cases; story 16). Concurrency classes 5/5 in stories 08–14. |
+| NFR-05 | 16 | Full `verify` ≈ 10 s wall, Surefire total 7.6–8.0 s per run (story 16). |
+| NFR-06 | 02, 16 | `EventPayloadPolicyTest` (02); story 16 review: every `LOG.log` carries IDs, counts or class names only. |
 | NFR-07 | 01 | `PomDependencyPolicyTest`, `BuildSmokeTest` |
-| NFR-08 | 03, 16 | `MainCodeTimeSourcesTest`, `ManualSchedulerTest`, `MutableClockTest` (03) |
-| NFR-09 | 16 | |
+| NFR-08 | 03, 16 | `MainCodeTimeSourcesTest`, `ManualSchedulerTest`, `MutableClockTest` (03); story 16 grep clean. |
+| NFR-09 | 16 | Review (story 16): every main class states its thread-safety, directly or through its package Javadoc (domain: immutable; ports: implementations must be thread-safe). |
 | NFR-10 | 10, 13 | `ThrottlingTest` via `breakerState()` (10); permits in use via `SemaphoreConcurrencyLimiter#inUse`, DLQ via `InMemoryWorkQueue#deadLetters` (13). No coalesced counter (Could; not built). |
 
 ### 6.3 Contract coverage
@@ -216,3 +216,46 @@ Test column is filled in by each story.
 | §D Failure matrix (16 rows) | §3.3, FR-03 – FR-05, FR-10, FR-11, FR-15, FR-18, FR-19, FR-22 – FR-26 |
 | §E Tests E1–E10 | FR / NFR acceptance criteria; stories 08–15 |
 | §F Tradeoffs, observability | A4, FR-13, NFR-10, story 17 |
+
+## 7. §D failure matrix coverage
+
+| # | §D scenario | Covered by | Notes |
+|---|---|---|---|
+| 1 | Duplicate publish event | `ContractE08JobIdempotencyTest#duplicateEvents` | Same and different planner. |
+| 2 | Planner crashes mid-page | `PlannerTest#crashResumesFromCursor`, `#crashAfterLastSave` | ≤ 1 page re-sent; `loadsExpected` exact. |
+| 3 | Two planners on one job | `PlannerTest#oneLeaseHolder`, `InMemoryFanoutJobStoreTest#plannerLease` | |
+| 4 | Duplicate `LoadRequest` / v6 and v7 queue the same engagement | `ContractE02CoalescingTest` | |
+| 5 | Executor crashes during the load | `ContractE03CrashInjectionTest` (AFTER_CLAIM, AFTER_LOAD) | ≤ 1 extra load. |
+| 6 | Crash after the load, before publish | `ContractE03CrashInjectionTest` (AFTER_RECORD), `PublishFailureTest` | No reload (outbox). |
+| 7 | Publish succeeds, crash before ack | `ContractE03CrashInjectionTest` (AFTER_PUBLISH), `ContractE10…#crashDuplicateIsNoOp` | Consumer side: duplicate `eventId` no-op. |
+| 8 | User declines while the load is in flight | `ContractE10…Rules#lowerSeqIgnored`, `FromExecutor#lowerSeqFromLaterLoadIgnored` | The decision itself lives in the Tracking Service; tested against the fake consumer. Depends on A1. |
+| 9 | Version withdrawn during the job | `ContractE09SupersessionTest` | |
+| 10 | Load shows a different template or branch | `LoadExecutorTest#differentTemplateStillPublished`, `ContractE10…Rules#differentTemplateApplied` | |
+| 11 | Loader returns 429 or saturates | `ContractE04ThrottlingNoDlqTest`, `ThrottlingTest` | 0 DLQ. |
+| 12 | Loader down for hours | `ThrottlingTest` (breaker stops receiving; half-open probe), `CircuitBreakerTest` | **Partial:** re-enqueue by reconciliation beyond SQS retention is not built (no reconciliation job). |
+| 13 | Engagement not found or archived | `ContractE06PermanentErrorTest`, `PermanentErrorTest` | |
+| 14 | Poison message | `PoisonMessageTest` | DLQ after 5 receives; no `LoadFailed`/outcome (G-23, A9). |
+| 15 | A 40k firm floods the queue | `ContractE05FairnessTest`, `FirmCapDeferralTest` | Worst rank ≈ 1,000 vs bound 1,350. |
+| 16 | Duplicate job outcomes | `ContractE08JobIdempotencyTest#duplicateOutcomes`, `#concurrentDuplicateOutcomes` | |
+
+Contract tests §E: E1–E10 all implemented and green (`com.caseware.fanout.contract`, `-Dgroups=contract`).
+
+## 8. Review (story 16)
+
+**Requirements met.** FR-01 – FR-26 and NFR-01 – NFR-09 are each verified by at least one named test or review check (§6.2). All ten contract tests pass. The full suite (217 cases) passed 5/5 consecutive runs in ≈ 10 s each. Main code uses no wall-clock or sleep calls.
+
+**Gaps and partial coverage.**
+- §D row 12: no reconciliation job, so messages older than SQS retention would need the (unbuilt) reconcile producer. The RECONCILE lane exists and is polled.
+- NFR-10 (Could): no coalesced-count accessor. Permits in use, DLQ contents and breaker state are readable.
+- G-23 limitation: a poison message reaches the DLQ without `EngagementLoadFailed` or a job outcome, so its job stays open until reconciliation.
+- G-29 (Planner producer port, `advanceGraphRev`, `Cursor.END`) was applied within story 14's scope and still needs owner review.
+- E5 depends on real time: the margin is about 6 loader-latency waves; a heavily loaded CI machine could narrow it.
+- After a hard timeout, only a late *success* is turned into `Transient`; a late loader exception keeps its own classification (story 12 note).
+
+**Improvements (not done; ranked).**
+1. Reconciliation producer and the A2 backfill path (null-template rows → BACKFILL lane).
+2. A coalesced counter and a small metrics snapshot per executor (NFR-10).
+3. Emit `EngagementLoadFailed(POISON)` on the receive that dead-letters a poison message, so its job can close.
+4. Replace the Planner's per-page lease renewal with a heartbeat if pages become slow (page size 1,000 at real latency).
+
+**Deliberately left out.** Real AWS adapters, LocalStack and Docker; the Tracking Service implementation (head computation, projection writes); GSI lag simulation; the SQS 12-h visibility ceiling; autoscaling (static `C/N` split, A4); a `template-events` receive loop around the Planner (it is driven by its caller).

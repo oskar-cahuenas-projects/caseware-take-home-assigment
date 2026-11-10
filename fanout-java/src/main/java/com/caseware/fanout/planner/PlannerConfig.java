@@ -6,7 +6,7 @@ import java.util.Objects;
 
 /**
  * Planner settings. Production: {@code pageSize} 1,000 (§C). {@code lease} must outlast one page's sends;
- * it is renewed before every page.
+ * it is renewed before every page. Immutable.
  *
  * @param region envelope field of every message the planner sends (G-26)
  */

@@ -5,7 +5,7 @@ import java.time.Duration;
 
 /**
  * The other team's engagement loader (I5): read-only, ~60 s per call, capacity-bound,
- * no idempotency key. Calls must be made under a {@link Permit}.
+ * no idempotency key. Calls must be made under a {@link Permit}. Implementations must be thread-safe.
  */
 public interface EngagementLoader {
     EngagementTemplateState load(String firmId, String engagementId, Duration timeout) throws LoaderException;
