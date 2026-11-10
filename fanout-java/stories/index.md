@@ -36,7 +36,7 @@ Requirements: [`../docs/requirements.md`](../docs/requirements.md) · Gaps: [`..
 | 14 | [Thin Planner](14-thin-planner.md) | E6 | Should | Done | E8 (events), E9 | None |
 | 15 | [Tracking Service consumer contract test](15-tracking-service-contract-test.md) | E6 | Should | Done | E10 | None |
 | 16 | [Full test run and review](16-full-test-run-and-review.md) | E7 | Must | Done | all | None |
-| 17 | [README and docs](17-readme-and-docs.md) | E8 | Must | To do | — | None |
+| 17 | [README and docs](17-readme-and-docs.md) | E8 | Must | Done | — | None |
 
 Must stories cover contract tests E1–E7. Story 07 covers the outcome half of E8.
 

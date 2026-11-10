@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 A Caseware take-home assignment in two parts:
 
 - **Part 1, the design (done):** a system that flags engagements when a new template version is published, without loading engagements on any user-facing path. Each engagement load costs ~1 min through another team's capacity-limited loader. The design is written in Markdown with Mermaid diagrams.
-- **Part 2, the code (in progress):** a Java 21 implementation of the **Load Executor** (Stage B of the fan-out worker), in `fanout-java/`. Stories and status: `fanout-java/stories/index.md`.
+- **Part 2, the code (done):** a Java 21 implementation in `fanout-java/` of the **Load Executor** (Stage B of the fan-out worker) plus a **thin Planner** (Stage A). All 17 stories are done, contract tests E1–E10 are green, and the suite has 217 tests (~10 s). Overview and tradeoffs: `fanout-java/README.md`. Stories and status: `fanout-java/stories/index.md`; review and §D coverage: `fanout-java/docs/requirements.md` §7–§8.
 
 ## Commands (Part 2)
 
@@ -19,10 +19,12 @@ Run from `fanout-java/`. Maven wrapper pins Maven 3.9.10; JDK 21 required.
 - Contract tests only (§E, `@Tag("contract")`): `./mvnw -q test -Dgroups=contract`
 - Everything except contract tests: `./mvnw -q test -DexcludedGroups=contract`
 - Reports: `target/surefire-reports/`
+- E1, E4 and E5 run in real time on virtual threads (plus a few concurrency unit tests); the rest run deterministically under `MutableClock` + `ManualScheduler`.
 
 ## Layout and source of truth
 
 - `docs/solution-design.md`: the final, consolidated design document (5 sections). **This is the deliverable.** When it disagrees with an analysis file, the design document wins.
+- `fanout-java/README.md`: the Part 2 README (scope, contract mapping, tradeoffs, limitations).
 - `fanout-java/fanout-worker-contract.md`: the **Part 2 specification**. It defines the interfaces I1–I7, the Java record and interface signatures, the executor step order, the failure matrix, and the 10 prioritized tests. Read it before writing any Part 2 code.
 - `fanout-java/analysis-documents/`: one closed file per WBS work package (1.1 to 6). They were inputs to the design document. Where two of them disagree, the later section was applied during the WBS 8 review. Two that still matter for Part 2: `WBS-3.2-unreliable-delivery.md` (idempotency and outbox) and `wbs-3.3-failure-recovery-data-residency.md`.
 - `docs/chat-session-log/log-chat-design-document.md`: the AI session log. Its "Open items" section lists unresolved questions.
