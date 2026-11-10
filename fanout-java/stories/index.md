@@ -21,7 +21,7 @@ Requirements: [`../docs/requirements.md`](../docs/requirements.md) · Gaps: [`..
 | NN | Story | Epic | Priority | Status | Contract tests | Checkpoint |
 |---|---|---|---|---|---|---|
 | 01 | [Create the Maven project](01-create-maven-project.md) | E0 | Must | Done | — | None |
-| 02 | [Domain model and ports](02-domain-model-and-ports.md) | E1 | Must | To do | — | None |
+| 02 | [Domain model and ports](02-domain-model-and-ports.md) | E1 | Must | Done | — | None |
 | 03 | [Clock, config and test kit](03-clock-config-and-testkit.md) | E2 | Must | To do | — | None |
 | 04 | [In-memory work queue](04-in-memory-work-queue.md) | E2 | Must | To do | — | None |
 | 05 | [In-memory load ledger](05-in-memory-load-ledger.md) | E2 | Must | To do | groundwork E2, E3 | None |

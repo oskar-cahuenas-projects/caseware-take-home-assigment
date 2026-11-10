@@ -183,8 +183,8 @@ Test column is filled in by each story.
 | FR-13 | 06, 08 | |
 | FR-14 | 06, 08 | |
 | FR-15 | 09 | |
-| FR-16 | 02, 05, 08 | |
-| FR-17 | 02, 07 | |
+| FR-16 | 02, 05, 08 | `DomainBehaviourTest` (02) |
+| FR-17 | 02, 07 | `EventPayloadPolicyTest`, `RecordValidationTest` (02) |
 | FR-18 | 04, 11 | |
 | FR-19 | 07, 11 | |
 | FR-20 | 04 | |
@@ -199,7 +199,7 @@ Test column is filled in by each story.
 | NFR-03 | 09 | |
 | NFR-04 | 16 | |
 | NFR-05 | 16 | |
-| NFR-06 | 02, 16 | |
+| NFR-06 | 02, 16 | `EventPayloadPolicyTest` (02) |
 | NFR-07 | 01 | `PomDependencyPolicyTest`, `BuildSmokeTest` |
 | NFR-08 | 03, 16 | |
 | NFR-09 | 16 | |
