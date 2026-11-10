@@ -128,7 +128,7 @@ G-06 is widened: with A1 false, `markPublished(engagementId, long observedSeq)` 
 | FR-17 | Events carry IDs, versions and the envelope (`schemaVersion`, `correlationId`, `region`). | §A envelope, G-26 | Event records contain no free-text content fields; envelope present on every event. | |
 | FR-18 | Unexpected exceptions: release permit, no ack; queue dead-letters after `maxReceiveCount = 5`. | §D row 14, G-23 | A request that always throws reaches the DLQ after exactly 5 receives. | |
 | FR-19 | Job store: `createIfAbsent` idempotent; `recordOutcome` idempotent per `(jobId, engagementId)`; load side closes on `done + dlq = expected`. | §B FanoutJob, §D rows 1, 16, E8 | Duplicate outcomes leave counters exact; status COMPLETE exactly when the rule holds. | |
-| FR-20 | In-memory `WorkQueue` mirrors SQS: visibility timeout, receive count, ack, `extendVisibility`, `requeueWithDelay` (new message), delay cap 15 min, DLQ per lane. | §B WorkQueue, §C | Unit tests per behaviour under `MutableClock`. | |
+| FR-20 | In-memory `WorkQueue` mirrors SQS: visibility timeout, receive count, ack, `extendVisibility`, `requeueWithDelay` (new message), delay cap 15 min, DLQ per lane. | §B WorkQueue, §C | Unit tests per behaviour under `MutableClock`. | `InMemoryWorkQueueTest` |
 | FR-21 | In-memory `LoadLedger`: atomic claim with lease, W and `knownSeq`; `recordObservation` → `PENDING_PUBLISH`; `markPublished` → `DONE`; `release`. | §B LoadLedger, G-19, G-21 | Concurrent claims on one engagement ⇒ exactly one `Claimed`. | |
 | FR-22 | Planner (Should): deterministic `jobId`; duplicate event ⇒ one job. | §B, §D row 1, E8 | Two identical events ⇒ one job, one planning pass. | |
 | FR-23 | Planner: one planner per job via `plannerLease`. | §D row 3 | Two concurrent planners ⇒ one proceeds. | |
@@ -185,9 +185,9 @@ Test column is filled in by each story.
 | FR-15 | 09 | |
 | FR-16 | 02, 05, 08 | `DomainBehaviourTest` (02) |
 | FR-17 | 02, 07 | `EventPayloadPolicyTest`, `RecordValidationTest` (02) |
-| FR-18 | 04, 11 | |
+| FR-18 | 04, 11 | `InMemoryWorkQueueTest#maxReceiveCountDeadLetters` (04) |
 | FR-19 | 07, 11 | |
-| FR-20 | 04 | |
+| FR-20 | 04 | `InMemoryWorkQueueTest` |
 | FR-21 | 05 | |
 | FR-22 | 14 | |
 | FR-23 | 14 | |
