@@ -15,7 +15,13 @@ The working notes behind each design section, one file per work package, are in 
 
 ## How I used AI
 
-- **Part 1 (design):** I wrote [docs/solution-design.md](docs/solution-design.md) with Claude chat in the desktop app, using the Opus 5.5 model. I worked in one chat session per work package.
-- **Part 2 (implementation):** I am implementing the fan-out worker with Claude Code CLI in VS Code. The implementation follows the contract in [fanout-java/fanout-worker-contract.md](fanout-java/fanout-worker-contract.md). The Maven project is in [fanout-java/](fanout-java/).
+- **Part 1 (design):** I wrote [docs/solution-design.md](docs/solution-design.md) with Claude Chat in the desktop app, using the Opus 5.5 model. I worked in one chat session per work package, following these steps:
+
+  1. **Problem understanding and planning:** I started a chat session with AI acting as a Staff Java Engineer specializing in banking, audit and accounting software, and microservices architecture. The AI reviewed the challenge requirements and job description, then summarized the problem. It asked clarifying questions to assess my understanding and explained relevant accounting and auditing terminology. We agreed on key assumptions and organized the work into a Work Breakdown Structure (WBS), documented in [docs/wbs.md](docs/wbs.md).
+
+  2. **Design exploration:** For each WBS item (in [fanout-java/analysis-documents](fanout-java/analysis-documents)) I created a separate chat session to discuss the topic, evaluate alternatives, and document assumptions and proposed solutions in Markdown files. Topics included hot and cold paths, rollback strategies, AWS services, scalability, and cost estimates.
+
+  3. **Final documentation and implementation scope:** Using the documents produced in previous steps, I completed the final WBS task: consolidating the analysis into the solution design document and defining the scope for the Java implementation, focusing on the selected fan-out worker component.
+
 - **AI usage notes:** [ai-usage-notes.md](docs/ai-usage-notes.md) explains where AI helped, where I corrected or ignored it, how I would guide other engineers, and where AI should not be trusted in this domain.
 - **Session logs:** the AI sessions, in Markdown format, are in [docs/chat-session-log/](docs/chat-session-log/).
