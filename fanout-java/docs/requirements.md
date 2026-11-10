@@ -178,15 +178,15 @@ Test column is filled in by each story.
 | FR-08 | 12 | |
 | FR-09 | 08 | `LoadExecutorTest#stepOrder` |
 | FR-10 | 10 | `ThrottlingTest`, `BackoffTest`, `ContractE04ThrottlingNoDlqTest` |
-| FR-11 | 11 | |
+| FR-11 | 11 | `PermanentErrorTest`, `ContractE06PermanentErrorTest` |
 | FR-12 | 10 | `CircuitBreakerTest`, `ThrottlingTest#breakerStopsReceiving`, `#halfOpenProbe` |
 | FR-13 | 06, 08 | `SemaphoreConcurrencyLimiterTest#hammer`, `#firmCap` (06), `ContractE01CapacityInvariantTest` (08) |
 | FR-14 | 06, 08 | `SemaphoreConcurrencyLimiterTest#doubleCloseReleasesOnce`, `#releasedOnException` (06), `ContractE01CapacityInvariantTest` (08) |
 | FR-15 | 09 | `ContractE03CrashInjectionTest` |
 | FR-16 | 02, 05, 08 | `DomainBehaviourTest` (02), `InMemoryLoadLedgerTest#freshnessWithoutSequence` (05), `LoadExecutorTest#a1False` (08) |
 | FR-17 | 02, 07 | `EventPayloadPolicyTest`, `RecordValidationTest` (02), `InMemoryObservationPublisherTest` (07) |
-| FR-18 | 04, 11 | `InMemoryWorkQueueTest#maxReceiveCountDeadLetters` (04) |
-| FR-19 | 07, 11 | `InMemoryFanoutJobStoreTest`, `ContractE08JobIdempotencyTest` (07) |
+| FR-18 | 04, 11 | `InMemoryWorkQueueTest#maxReceiveCountDeadLetters` (04), `PoisonMessageTest` (11) |
+| FR-19 | 07, 11 | `InMemoryFanoutJobStoreTest`, `ContractE08JobIdempotencyTest` (07), `ContractE06PermanentErrorTest#mixedJobClosesOnRule` (11) |
 | FR-20 | 04 | `InMemoryWorkQueueTest` |
 | FR-21 | 05 | `InMemoryLoadLedgerTest` |
 | FR-22 | 14 | |
@@ -195,7 +195,7 @@ Test column is filled in by each story.
 | FR-25 | 14 | |
 | FR-26 | 15 | |
 | NFR-01 | 08 | `ContractE01CapacityInvariantTest` |
-| NFR-02 | 09, 10, 11 | `ContractE03CrashInjectionTest#crashMidBatch` (09), `ContractE04ThrottlingNoDlqTest` (10) |
+| NFR-02 | 09, 10, 11 | `ContractE03CrashInjectionTest#crashMidBatch` (09), `ContractE04ThrottlingNoDlqTest` (10), `ContractE06PermanentErrorTest` (11) |
 | NFR-03 | 09 | `ContractE03CrashInjectionTest` |
 | NFR-04 | 16 | |
 | NFR-05 | 16 | |

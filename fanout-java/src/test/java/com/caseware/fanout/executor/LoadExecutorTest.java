@@ -53,10 +53,10 @@ class LoadExecutorTest {
         var queue = new InMemoryWorkQueue<LoadRequest>("publish", clock, CONFIG.visibilityTimeout(), 5, CONFIG.maxRequeueDelay());
         var jobs = new InMemoryFanoutJobStore();
         var ports = new ExecutorPorts(
-                new RecordingQueue(queue, calls), new RecordingLedger(new InMemoryLoadLedger(clock), calls),
-                new RecordingJobs(jobs, calls), new RecordingPublisher(new InMemoryObservationPublisher(), calls),
-                new RecordingLoader(new FakeEngagementLoader(clock), calls), new ManualScheduler(clock), clock);
-        var limiter = new RecordingLimiter(new SemaphoreConcurrencyLimiter(25, 5), calls);
+                new RecordingPorts.RecordingQueue(queue, calls), new RecordingPorts.RecordingLedger(new InMemoryLoadLedger(clock), calls),
+                new RecordingPorts.RecordingJobs(jobs, calls), new RecordingPorts.RecordingPublisher(new InMemoryObservationPublisher(), calls),
+                new RecordingPorts.RecordingLoader(new FakeEngagementLoader(clock), calls), new ManualScheduler(clock), clock);
+        var limiter = new RecordingPorts.RecordingLimiter(new SemaphoreConcurrencyLimiter(25, 5), calls);
         var executor = new LoadExecutor("w-1", ports, limiter, CONFIG, new Random(1), CrashHook.NONE);
         queue.send(new LoadRequest("req-1", "job-1", "firm-1", "eng-1", "tpl-1",
                 com.caseware.fanout.domain.Lane.PUBLISH, 0, clock.instant(), "corr-1", 0, 1, "ca-central-1"));
@@ -66,7 +66,7 @@ class LoadExecutorTest {
         assertThat(calls).containsExactly("claim", "permit", "load", "permit.close", "recordObservation",
                 "publish", "markPublished", "outcome:DONE", "ack");
         assertThat(queue.depth()).isZero();
-        assertThat(limiter.delegate.inUse()).isZero();
+        assertThat(limiter.delegate().inUse()).isZero();
     }
 
     @Test
@@ -165,46 +165,5 @@ class LoadExecutorTest {
             assertThat(h.jobs.outcome("job-1", "eng-1")).contains(Outcome.DONE);
             assertThat(h.queue.depth()).isZero();
         }
-    }
-
-    // ---- recording decorators (AC1) ----
-
-    private record RecordingQueue(WorkQueue<LoadRequest> d, List<String> calls) implements WorkQueue<LoadRequest> {
-        public List<Delivery<LoadRequest>> receive(int max, Duration wait) { return d.receive(max, wait); }
-        public void extendVisibility(Delivery<LoadRequest> x, Duration by) { calls.add("extend"); d.extendVisibility(x, by); }
-        public void ack(Delivery<LoadRequest> x) { calls.add("ack"); d.ack(x); }
-        public void requeueWithDelay(Delivery<LoadRequest> x, Duration delay) { calls.add("requeue"); d.requeueWithDelay(x, delay); }
-        public void requeueWithDelay(Delivery<LoadRequest> x, LoadRequest body, Duration delay) { calls.add("requeue"); d.requeueWithDelay(x, body, delay); }
-        public void deadLetter(Delivery<LoadRequest> x, String reason) { calls.add("deadLetter"); d.deadLetter(x, reason); }
-    }
-
-    private record RecordingLedger(LoadLedger d, List<String> calls) implements LoadLedger {
-        public Claim claim(String e, String j, String w, Duration l, Duration f, long k) { calls.add("claim"); return d.claim(e, j, w, l, f, k); }
-        public void recordObservation(String e, EngagementTemplateState s, String id) { calls.add("recordObservation"); d.recordObservation(e, s, id); }
-        public void markPublished(String e, String id) { calls.add("markPublished"); d.markPublished(e, id); }
-        public void release(String e, String w) { calls.add("release"); d.release(e, w); }
-    }
-
-    private record RecordingJobs(FanoutJobStore d, List<String> calls) implements FanoutJobStore {
-        public boolean createIfAbsent(FanoutJob job) { return d.createIfAbsent(job); }
-        public void recordOutcome(String j, String e, Outcome o) { calls.add("outcome:" + o); d.recordOutcome(j, e, o); }
-        public Optional<FanoutJob> find(String j) { return d.find(j); }
-    }
-
-    private record RecordingPublisher(ObservationPublisher d, List<String> calls) implements ObservationPublisher {
-        public void publish(EngagementStateObserved e) { calls.add("publish"); d.publish(e); }
-        public void publish(EngagementLoadFailed e) { calls.add("publishFailed"); d.publish(e); }
-    }
-
-    private record RecordingLoader(EngagementLoader d, List<String> calls) implements EngagementLoader {
-        public EngagementTemplateState load(String f, String e, Duration t) throws LoaderException { calls.add("load"); return d.load(f, e, t); }
-    }
-
-    private record RecordingLimiter(SemaphoreConcurrencyLimiter delegate, List<String> calls) implements ConcurrencyLimiter {
-        public Optional<Permit> tryAcquire(String firmId) {
-            calls.add("permit");
-            return delegate.tryAcquire(firmId).map(p -> (Permit) () -> { calls.add("permit.close"); p.close(); });
-        }
-        public int freePermits() { return delegate.freePermits(); }
     }
 }

@@ -30,7 +30,7 @@ Requirements: [`../docs/requirements.md`](../docs/requirements.md) · Gaps: [`..
 | 08 | [Executor core and step order](08-executor-core-step-order.md) | E3 | Must | Done | E1, E2 | None |
 | 09 | [Crash recovery and outbox](09-crash-recovery-and-outbox.md) | E3 | Must | Done | E3 | None |
 | 10 | [Throttling, backoff and circuit breaker](10-throttling-backoff-circuit-breaker.md) | E4 | Must | Done | E4 | None |
-| 11 | [Permanent errors and DLQ](11-permanent-errors-and-dlq.md) | E4 | Must | To do | E6 | None |
+| 11 | [Permanent errors and DLQ](11-permanent-errors-and-dlq.md) | E4 | Must | Done | E6 | None |
 | 12 | [Visibility heartbeat and hard timeout](12-visibility-heartbeat.md) | E4 | Must | To do | E7 | None |
 | 13 | [Weighted lanes and fairness](13-weighted-lanes-and-fairness.md) | E5 | Must | To do | E5 | CP3 |
 | 14 | [Thin Planner](14-thin-planner.md) | E6 | Should | To do | E8 (events), E9 | None |

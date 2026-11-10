@@ -241,9 +241,10 @@ public final class LoadExecutor implements AutoCloseable {
     }
 
     /**
-     * Failure classification (§C, §D rows 11–13, G-16). Throttled and Transient release the claim, count
-     * towards the breaker and requeue with backoff (a new message, so the receive count stays reserved for
-     * real failures). Only Transient increments {@code attempt}; its 8th occurrence dead-letters.
+     * Failure classification (§C, §D rows 11–13, G-16). Every branch first releases the claim. Throttled and
+     * Transient count towards the breaker and requeue with backoff (a new message, so the receive count stays
+     * reserved for real failures); only Transient increments {@code attempt}, and its 8th occurrence
+     * dead-letters. NotFound and Permanent dead-letter at once and do not count towards the breaker.
      */
     private boolean onLoadFailure(Delivery<LoadRequest> d, LoadRequest r, LoaderException e) {
         ports.ledger().release(r.engagementId(), workerId);                                         // G-21
@@ -265,14 +266,11 @@ public final class LoadExecutor implements AutoCloseable {
                 return true;
             }
             case LoaderException.NotFound n -> {
-                // Interim until story 11 (dead-letter branch): leave the message for redelivery.
-                LOG.log(WARNING, "not found: correlationId={0} jobId={1} engagementId={2}",
-                        r.correlationId(), r.jobId(), r.engagementId());
-                return false;
+                deadLetter(d, r, FailureReason.NOT_FOUND);                                          // §D row 13
+                return false;                                                                        // not a capacity signal (G-03)
             }
             case LoaderException.Permanent p -> {
-                LOG.log(WARNING, "permanent failure: correlationId={0} jobId={1} engagementId={2}",
-                        r.correlationId(), r.jobId(), r.engagementId());
+                deadLetter(d, r, FailureReason.PERMANENT);
                 return false;
             }
         }
